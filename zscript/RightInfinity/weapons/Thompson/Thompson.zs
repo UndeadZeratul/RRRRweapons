@@ -126,7 +126,7 @@ class RIThompson:HDWeapon{
 				);
 				sb.drawnum(hpl.countinv(boxmagcls),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
-					-22,-12,"RBRSA3A7","STFULAUT"
+					-22,-12,"STSEMAUT","STFULAUT"
 				);
 				for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
 					double RIrad=13; //circle radius
@@ -162,7 +162,7 @@ class RIThompson:HDWeapon{
 				);
 				sb.drawnum(hpl.countinv(boxmagcls),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
-					-20,-12,"RBRSA3A7","STFULAUT"
+					-20,-12,"STSEMAUT","STFULAUT"
 				);
 				for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
 					let angle = 360.0 / drummagmax;
