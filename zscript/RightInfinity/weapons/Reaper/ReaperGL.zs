@@ -132,7 +132,7 @@ class RIReaperGL:RIReaper{
 				sb.drawnum(hpl.countinv("RIReapM8"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				
 				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-20,-12,"RBRSA3A7","STFULAUT"
+					-20,-12,"STSEMAUT","STFULAUT"
 				);
 				
 			if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
@@ -176,7 +176,7 @@ class RIReaperGL:RIReaper{
 			sb.drawnum(hpl.countinv("RIReapD20"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
 			sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-				-24,-12,"RBRSA3A7","STFULAUT"
+				-24,-12,"STSEMAUT","STFULAUT"
 			);
 			//straight
 		if(hdw.weaponstatus[ASHTS_CHAMBER]==2){

@@ -146,7 +146,7 @@ class RIReaperZM:RIReaper{
 				sb.drawnum(hpl.countinv("RIReapM8"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				
 				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-19,-17,"RBRSA3A7","STFULAUT"
+					-19,-17,"STSEMAUT","STFULAUT"
 				);
 				
 				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
@@ -191,7 +191,7 @@ class RIReaperZM:RIReaper{
 				sb.drawnum(hpl.countinv("RIReapD20"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
 				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-23,-17,"RBRSA3A7","STFULAUT"
+					-23,-17,"STSEMAUT","STFULAUT"
 				);
 				//straight
 				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
@@ -231,7 +231,7 @@ class RIReaperZM:RIReaper{
 		if(hdw.weaponstatus[ASHTS_ZMAG]>100)lod=random[shitgun](10,99);
 		sb.drawnum(lod,-16,-10,sb.DI_SCREEN_CENTER_BOTTOM|sb.DI_TEXT_ALIGN_RIGHT,Font.CR_RED);
 				sb.drawwepcounter(hdw.weaponstatus[ASHTS_ZAUTO],
-			-24,-5,"RBRSA3A7","STFULAUT","STBURAUT"
+			-24,-5,"STSEMAUT","STFULAUT","STBURAUT"
 		);
 		sb.drawwepnum(lod,50,posy:-2);
 		
