@@ -10,7 +10,7 @@ class RIReaperZM:RIReaper{
 		//$Title "REAPRGL"
 		//$Sprite "ASHTR0"
 
-		obituary "%k called a %o harvest.";
+		obituary "$OB_REAPER_ZM";
 		weapon.selectionorder 351;
 		weapon.slotnumber 3;
 		weapon.kickback 30;
@@ -18,17 +18,17 @@ class RIReaperZM:RIReaper{
 		weapon.bobrangey 0.8;
 		weapon.bobspeed 2.5;
 		scale 0.50;
-		inventory.pickupmessage "You got the Reaper Automatic Shotgun!";
+		inventory.pickupmessage "$PICKUP_REAPER_ZM";
 		hdweapon.barrelsize 29,1,3;
 		inventory.icon "ASHRE0";
 		hdweapon.refid RILD_REAPZM;
-		tag "Reaper Automatic Shotgun W/ Underbarrel Carbine";
+		tag "$TAG_REAPER_ZM";
 	}
 	override void tick(){
 		super.tick();
 		drainheat(ASHTS_HEAT,12);
 	}
-//=========================================
+
 	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
 	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
 
@@ -43,7 +43,6 @@ class RIReaperZM:RIReaper{
 		return blx+(mgg<0?0:(ENC_AST_DRM_LOADED+mgg*ENC_SHELLLOADED))+(mgz<0?0:(mgz*ENC_426_LOADED));
 	}
 
-//===============================================
 	//returns the power of the load just fired
 	static double Fire(actor caller,int choke=1){
 		double spread=7.;
@@ -117,121 +116,111 @@ class RIReaperZM:RIReaper{
 
 		return spr.."0",1.;
 	}
-//================================================
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
 		if(sb.hudlevel == 1){
 			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapD20")));
 			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapM8")));
 			
 			if(weaponstatus[ASHTS_BOXER]==0){
-// ----------------------------------
+				if(nextdrumloaded>=20){
+					sb.drawimage("ASDMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				}else if(nextdrumloaded<1){
+					sb.drawimage("ASDMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
+				}else sb.drawbar(
+					"ASDMNORM","ASDMGREY",
+					nextdrumloaded,20,
+					(-51,-3),-1,
+					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+				);
+				sb.drawnum(hpl.countinv("RIReapD20"),-48,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextmagloaded>=8){
+					sb.drawimage("ASSMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				}else if(nextmagloaded<1){
+					sb.drawimage("ASSMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
+				}else sb.drawbar(
+					"ASSMNORM","ASSMGREY",
+					nextmagloaded,20,
+					(-79,-3),-1,
+					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+				);
+				sb.drawnum(hpl.countinv("RIReapM8"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				
+				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
+					-19,-17,"RBRSA3A7","STFULAUT"
+				);
+				
+				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
+					for(int i=hdw.weaponstatus[ASHTS_MAG]-1;i>0;i--){
+					double RIrad=13; //circle radius
+					double RIx=(RIrad-0)*cos((18*i)-95);
+					double RIy=(RIrad-0)*sin((18*i)-95);
+					sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
+					}
+				}else{
+					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
+					double RIrad=13; //circle radius
+					double RIx=(RIrad-0)*cos((18*i)-90);
+					double RIy=(RIrad-0)*sin((18*i)-90);
+					sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
+					}
+				}
 
-//	================================
-			if(nextdrumloaded>=20){
-				sb.drawimage("ASDMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextdrumloaded<1){
-				sb.drawimage("ASDMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASDMNORM","ASDMGREY",
-				nextdrumloaded,20,
-				(-51,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapD20"),-48,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-// ++++++++++++++++++++++++++
-		if(nextmagloaded>=8){
-				sb.drawimage("ASSMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextmagloaded<1){
-				sb.drawimage("ASSMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASSMNORM","ASSMGREY",
-				nextmagloaded,20,
-				(-79,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapM8"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-			
-			sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-				-19,-17,"RBRSA3A7","STFULAUT"
-			);
-			
-		if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-			for(int i=hdw.weaponstatus[ASHTS_MAG]-1;i>0;i--){
-			double RIrad=13; //circle radius
-			double RIx=(RIrad-0)*cos((18*i)-95);
-			double RIy=(RIrad-0)*sin((18*i)-95);
-			sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
-			}
-		}else{
-			for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-			double RIrad=13; //circle radius
-			double RIx=(RIrad-0)*cos((18*i)-90);
-			double RIy=(RIrad-0)*sin((18*i)-90);
-			sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
-			}
-		}
+			}else{
 
-//	================================
-		}else{
-//	================================
+				if(nextmagloaded>=8){
+					sb.drawimage("ASSMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				}else if(nextmagloaded<1){
+					sb.drawimage("ASSMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
+				}else sb.drawbar(
+					"ASSMNORM","ASSMGREY",
+					nextmagloaded,20,
+					(-51,-3),-1,
+					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+				);
+				sb.drawnum(hpl.countinv("RIReapM8"),-49,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextdrumloaded>=20){
+					sb.drawimage("ASDMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				}else if(nextdrumloaded<1){
+					sb.drawimage("ASDMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
+				}else sb.drawbar(
+					"ASDMNORM","ASDMGREY",
+					nextdrumloaded,20,
+					(-79,-3),-1,
+					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+				);
+				sb.drawnum(hpl.countinv("RIReapD20"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
-//---------------------------------------
-		if(nextmagloaded>=8){
-				sb.drawimage("ASSMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextmagloaded<1){
-				sb.drawimage("ASSMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASSMNORM","ASSMGREY",
-				nextmagloaded,20,
-				(-51,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapM8"),-49,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-//	+++++++++++++++++++++++++++++++++++++
-			if(nextdrumloaded>=20){
-				sb.drawimage("ASDMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextdrumloaded<1){
-				sb.drawimage("ASDMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASDMNORM","ASDMGREY",
-				nextdrumloaded,20,
-				(-79,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapD20"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-
-			sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-				-23,-17,"RBRSA3A7","STFULAUT"
-			);
-			//straight
-		if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-			for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-			double RIrad=37; //circle radius
-			double RIx=(RIrad-0)*cos((3*i)-0);
-			double RIy=(3*i)-90;
-			sb.drawwepdot(-51-(-RIx*1),53-(-RIy*1),(2,2));
-			sb.drawwepdot(-54-(-RIx*1),53-(-RIy*1),(4,2));
-			}
-		}else{
-			for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-			double RIrad=37; //circle radius
-			double RIx=(RIrad-0)*cos((3*i)-0);
-			double RIy=(3*i)-90;
-			sb.drawwepdot(-51-(-RIx*1),54-(-RIy*1),(2,2));
-			sb.drawwepdot(-54-(-RIx*1),54-(-RIy*1),(4,2));
+				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
+					-23,-17,"RBRSA3A7","STFULAUT"
+				);
+				//straight
+				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
+					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
+					double RIrad=37; //circle radius
+					double RIx=(RIrad-0)*cos((3*i)-0);
+					double RIy=(3*i)-90;
+					sb.drawwepdot(-51-(-RIx*1),53-(-RIy*1),(2,2));
+					sb.drawwepdot(-54-(-RIx*1),53-(-RIy*1),(4,2));
+					}
+				}else{
+					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
+					double RIrad=37; //circle radius
+					double RIx=(RIrad-0)*cos((3*i)-0);
+					double RIy=(3*i)-90;
+					sb.drawwepdot(-51-(-RIx*1),54-(-RIy*1),(2,2));
+					sb.drawwepdot(-54-(-RIx*1),54-(-RIy*1),(4,2));
+					}
+				}
 			}
 		}
-	}
-	}
-//============================================================================
-			if(hdw.weaponstatus[ASHTS_CHAMBER]==3){
-				sb.drawwepdot(-26,-25,(3,5));
-				sb.drawwepdot(-26,-22,(3,2));
-			}else if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-				sb.drawwepdot(-26,-25,(3,2));
-				sb.drawwepdot(-26,-22,(3,2));
-			}else if(hdw.weaponstatus[ASHTS_CHAMBER]==1)
-				{sb.drawwepdot(-26,-22,(3,2));}
+		if(hdw.weaponstatus[ASHTS_CHAMBER]==3){
+			sb.drawwepdot(-26,-25,(3,5));
+			sb.drawwepdot(-26,-22,(3,2));
+		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
+			sb.drawwepdot(-26,-25,(3,2));
+			sb.drawwepdot(-26,-22,(3,2));
+		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==1)
+			{sb.drawwepdot(-26,-22,(3,2));}
 		
 		//WHAT
 		if(hdw.weaponstatus[0]&ASHTF_GZCHAMBER){
@@ -247,19 +236,19 @@ class RIReaperZM:RIReaper{
 		sb.drawwepnum(lod,50,posy:-2);
 		
 		int ZMnextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("HD4mMag")));
-			if(ZMnextmagloaded>50){
-				sb.drawimage("ZMAGA0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(2,2));
-			}else if(ZMnextmagloaded<1){
-				sb.drawimage("ZMAGC0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,alpha:ZMnextmagloaded?0.6:1.,scale:(2,2));
-			}else sb.drawbar(
-				"ZMAGNORM","ZMAGGREY",
-				ZMnextmagloaded,50,
-				(-65,-4),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("HD4mMag"),-64,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-		
+		if(ZMnextmagloaded>50){
+			sb.drawimage("ZMAGA0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(2,2));
+		}else if(ZMnextmagloaded<1){
+			sb.drawimage("ZMAGC0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,alpha:ZMnextmagloaded?0.6:1.,scale:(2,2));
+		}else sb.drawbar(
+			"ZMAGNORM","ZMAGGREY",
+			ZMnextmagloaded,50,
+			(-65,-4),-1,
+			sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+		);
+		sb.drawnum(hpl.countinv("HD4mMag"),-64,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 	}
+	
 	override string gethelptext(){
 		return
 		WEPHELP_FIRESHOOT
@@ -275,40 +264,40 @@ class RIReaperZM:RIReaper{
 		HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl,
 		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc,string whichdot
 	){
-	if(hdw.weaponstatus[0]&ASHTF_GLMODE){
-		int cx,cy,cw,ch;
-		[cx,cy,cw,ch]=screen.GetClipRect();
-		sb.SetClipRect(
-			-16+bob.x,-4+bob.y,32,16,
-			sb.DI_SCREEN_CENTER
-		);
-		vector2 bobb=bob*4;
-		bobb.y=clamp(bobb.y,-8,8);
-		sb.drawimage(
-			"RPRFGRN",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-			alpha:0.9
-		);
-		sb.SetClipRect(cx,cy,cw,ch);
-		sb.drawimage(
-			"RPRZBCK",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
-		);		
-	}else{
-		int cx,cy,cw,ch;
-		[cx,cy,cw,ch]=screen.GetClipRect();
-		sb.SetClipRect(
-			-16+bob.x,-4+bob.y,32,16,
-			sb.DI_SCREEN_CENTER
-		);
-		vector2 bobb=bob*3;
-		bobb.y=clamp(bobb.y,-8,8);
-		sb.drawimage(
-			"RPRFGRN",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-			alpha:0.9
-		);
-		sb.SetClipRect(cx,cy,cw,ch);
-		sb.drawimage(
-			"RPRZBCK",(0,-11)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
-		);
+		if(hdw.weaponstatus[0]&ASHTF_GLMODE){
+			int cx,cy,cw,ch;
+			[cx,cy,cw,ch]=screen.GetClipRect();
+			sb.SetClipRect(
+				-16+bob.x,-4+bob.y,32,16,
+				sb.DI_SCREEN_CENTER
+			);
+			vector2 bobb=bob*4;
+			bobb.y=clamp(bobb.y,-8,8);
+			sb.drawimage(
+				"RPRFGRN",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+				alpha:0.9
+			);
+			sb.SetClipRect(cx,cy,cw,ch);
+			sb.drawimage(
+				"RPRZBCK",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+			);		
+		}else{
+			int cx,cy,cw,ch;
+			[cx,cy,cw,ch]=screen.GetClipRect();
+			sb.SetClipRect(
+				-16+bob.x,-4+bob.y,32,16,
+				sb.DI_SCREEN_CENTER
+			);
+			vector2 bobb=bob*3;
+			bobb.y=clamp(bobb.y,-8,8);
+			sb.drawimage(
+				"RPRFGRN",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+				alpha:0.9
+			);
+			sb.SetClipRect(cx,cy,cw,ch);
+			sb.drawimage(
+				"RPRZBCK",(0,-11)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+			);
 		}
 	}
 
@@ -452,21 +441,6 @@ class RIReaperZM:RIReaper{
 		---- A 1;
 		---- A 0 A_Refire();
 		goto ready;
-//===========================================
-// THANKS CHIIINNAAAAAAA
-//===========================================
-//	althold:
-//		---- A 1{
-//			if(
-//				invoker.weaponstatus[ASHTS_HEAT]>RILD_RPRZMCOOKOFF      
-//				&&!(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN)
-//				&&invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER
-//			)setweaponstate("cookoff");
-//			else A_WeaponReady(WRF_NOFIRE);
-//		}
-//		---- A 0 A_Refire();
-//		goto ready;
-
 
 	ZMflash:
 		ASTM JIHGFEDCBA 0 A_ReaperSpriteSelect();
@@ -799,10 +773,6 @@ class RIReaperZM:RIReaper{
 			}
 		}goto reloadend;
 
-//=============================================
-// 
-//=============================================
-
 	spawn:
 		ASHR A -1 nodelay{
 		// A Drum 450
@@ -870,9 +840,6 @@ class RIReaperZM:RIReaper{
 			}
 		}goto spawn;
 	
-//===========================
-// END OF STATES
-//===========================		
 	}
 	
 	override void InitializeWepStats(bool idfa){

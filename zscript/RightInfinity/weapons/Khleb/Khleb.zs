@@ -2,7 +2,7 @@
 // A 12-gauge pump for protection
 // ------------------------------------------------------------
 const RILD_KHLEB="KLB";
-class RI_khleb:HDShotgun{
+class RIKhleb:HDShotgun{
 	default{
 		//$Category "Weapons/Hideous Destructor"
 		//$Title "Khleb shotgun"
@@ -14,17 +14,17 @@ class RI_khleb:HDShotgun{
 		weapon.bobrangex 0.21;
 		weapon.bobrangey 0.86;
 		scale 0.6;
-		inventory.pickupmessage "It's Khleb-bering time!";
+		inventory.pickupmessage "$PICKUP_KHLEB";
 		hdweapon.barrelsize 30,0.5,2;
 		hdweapon.refid RILD_KHLEB;
-		tag "Khleb";
-		obituary "%k pyhiscally removed a chunk of %o and threw that s#&! on the floor";
+		tag "$TAG_KHLEB";
+		obituary "$OB_KHLEB";
 	}
 	//returns the power of the load just fired
 	static double Fire(actor caller,int choke=1){
 		double spread=6.;
 		double speedfactor=1.;
-		let hhh=Ri_khleb(caller.findinventory("RI_khleb"));
+		let hhh=RIKhleb(caller.findinventory("RIKhleb"));
 		if(hhh)choke=hhh.weaponstatus[KHLEBS_CHOKE];
 
 		choke=clamp(choke,0,7);
@@ -52,7 +52,7 @@ class RI_khleb:HDShotgun{
 		invoker.shotpower=shotpower;
 	}
 
-	override string,double getpickupsprite(){return "HUNT"..getpickupframe().."0",1.;}
+	override string,double getpickupsprite(bool usespare){return "HUNT"..getpickupframe(usespare).."0",1.;}
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
 		if(sb.hudlevel==1){
 			sb.drawimage("SHL1A0",(-47,-10),basestatusbar.DI_SCREEN_CENTER_BOTTOM);
@@ -73,34 +73,35 @@ class RI_khleb:HDShotgun{
 		}
 	}
 	override string gethelptext(){
+		LocalizeHelp();
 		return
-		WEPHELP_FIRE.."  Shoot (choke: "..weaponstatus[KHLEBS_CHOKE]..")\n"
-		..WEPHELP_ALTFIRE.."  Pump\n"
-		..WEPHELP_RELOAD.."  Reload (side saddles first)\n"
-		..WEPHELP_ALTRELOAD.."  Reload (pockets only)\n"
-		..WEPHELP_FIREMODE.."+"..WEPHELP_RELOAD.."  Load side saddles\n"
-		..WEPHELP_UNLOADUNLOAD
+		LWPHELP_FIRE..StringTable.Localize("$SHOOT_CH")..weaponstatus[HUNTS_CHOKE]..")\n"
+		..LWPHELP_ALTFIRE..StringTable.Localize("$PUMP")
+		..LWPHELP_RELOAD..StringTable.Localize("$SHTG_REL1")
+		..LWPHELP_ALTRELOAD..StringTable.Localize("$SHTG_REL2")
+		..LWPHELP_FIREMODE.."+"..LWPHELP_RELOAD..StringTable.Localize("$SHTG_SIDE")
+		..LWPHELP_UNLOADUNLOAD
 		;
 	}
 	override void DrawSightPicture(
 		HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl,
-		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc,string whichdot
+		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc
 	){
 		int cx,cy,cw,ch;
 		[cx,cy,cw,ch]=screen.GetClipRect();
 		sb.SetClipRect(
-			-16+bob.x,-4+bob.y,32,16,
+			-16+bob.x,-32+bob.y,32,40,
 			sb.DI_SCREEN_CENTER
 		);
-		vector2 bobb=bob*3;
-		bobb.y=clamp(bobb.y,-8,8);
+		vector2 bobb=bob*1.1;
 		sb.drawimage(
-			"frntsite",(0,0)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-			alpha:0.9
+			"frntsite",(0,0)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
 		);
 		sb.SetClipRect(cx,cy,cw,ch);
+
 		sb.drawimage(
-			"backsite",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+			"sgbaksit",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+			alpha:0.9
 		);
 	}
 	override double gunmass(){
@@ -126,24 +127,31 @@ class RI_khleb:HDShotgun{
 		if(careful)cockdir=(-cp,cp,-5);
 		else cockdir=(0,-cp*5,sin(pitch)*frandom(4,6));
 		cockdir.xy=rotatevector(cockdir.xy,angle);
-		actor fbs;bool gbg;
+		bool pocketed=false;
 		if(chm>1){
 			if(careful&&!A_JumpIfInventory("HDShellAmmo",0,"null")){
 				HDF.Give(self,"HDShellAmmo",1);
-			}else{
-				[gbg,fbs]=A_SpawnItemEx("HDFumblingShell",
-					cos(pitch)*8,0,height-8-sin(pitch)*8,
-					vel.x+cockdir.x,vel.y+cockdir.y,vel.z+cockdir.z,
-					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-				);
+				pocketed=true;
 			}
 		}else if(chm>0){	
 			cockdir*=frandom(1.,1.3);
-			[gbg,fbs]=A_SpawnItemEx("HDSpentShell",
-				cos(pitch)*8,frandom(-0.1,0.1),height-8-sin(pitch)*8,
-				vel.x+cockdir.x,vel.y+cockdir.y,vel.z+cockdir.z,
-				0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-			);
+		}
+
+		if(
+			!pocketed
+			&&chm>=1
+		){
+			vector3 gunofs=HDMath.RotateVec3D((9,-1,-2),angle,pitch);
+			actor rrr=null;
+
+			if(chm>1)rrr=spawn("HDFumblingShell",(pos.xy,pos.z+height*0.85)+gunofs+viewpos.offset);
+			else rrr=spawn("HDSpentShell",(pos.xy,pos.z+height*0.85)+gunofs+viewpos.offset);
+
+			rrr.target=self;
+			rrr.angle=angle;
+			rrr.vel=HDMath.RotateVec3D((1,-5,0.2),angle,pitch);
+			if(chm==1)rrr.vel*=1.3;
+			rrr.vel+=vel;
 		}
 	}
 	action void A_CheckPocketSaddles(){
@@ -173,7 +181,6 @@ class RI_khleb:HDShotgun{
 		int toload=min(
 			fromsidesaddles?invoker.weaponstatus[SHOTS_SIDESADDLE]:countinv("HDShellAmmo"),
 			alwaysone?1:(invoker.weaponstatus[KHLEBS_TUBESIZE]-invoker.weaponstatus[KHLEBS_TUBE]),
-			max(1,health/22),
 			maxhand
 		);
 		if(toload<1)return false;
@@ -192,9 +199,7 @@ class RI_khleb:HDShotgun{
 			A_StartSound("weapons/pocket",9);
 			A_MuzzleClimb(
 				frandom(0.1,0.15),frandom(0.2,0.4),
-				frandom(0.2
-
-,0.25),frandom(0.3,0.4),
+				frandom(0.2,0.25),frandom(0.3,0.4),
 				frandom(0.1,0.35),frandom(0.3,0.4),
 				frandom(0.1,0.15),frandom(0.2,0.4)
 			);
@@ -240,7 +245,6 @@ class RI_khleb:HDShotgun{
 			int hnd=min(
 				countinv("HDShellAmmo"),
 				12-invoker.weaponstatus[SHOTS_SIDESADDLE],
-				max(1,health/22),
 				3
 			);
 			if(hnd<1)setweaponstate("reloadSSend");
@@ -289,7 +293,7 @@ class RI_khleb:HDShotgun{
 	chamber:
 		SHTG A 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_ALTHOLDING,"nope");
 		SHTG A 0 A_SetAltHold(true);
-		SHTG A 1 A_Overlay(120,"playsgco");
+		SHTG A 1 A_StartSound("weapons/huntrackbak",8);
 		SHTG AE 2 A_MuzzleClimb(0,frandom(0.6,1.));
 		SHTG E 2 A_JumpIf(pressingaltfire(),"longstroke");
 		SHTG EA 2 A_MuzzleClimb(0,-frandom(0.6,1.));
@@ -380,7 +384,7 @@ class RI_khleb:HDShotgun{
 		goto rackreloadend;
 
 	unrack:
-		SHTG F 0 A_Overlay(120,"playsgco2");
+		SHTG F 0 A_StartSound("weapons/huntrackfwd",8);
 		SHTG E 2 A_JumpIf(!pressingfire(),1);
 		SHTG EA 2{
 			if(pressingfire())A_SetTics(1);
@@ -388,14 +392,14 @@ class RI_khleb:HDShotgun{
 		}
 		SHTG A 0 A_ClearRefire();
 		goto ready;
-	playsgco:
-		TNT1 A 8 A_StartSound("weapons/huntrackup",8);
-		TNT1 A 0 A_StopSound(8);
-		stop;
-	playsgco2:
-		TNT1 A 8 A_StartSound("weapons/huntrackdown",8);
-		TNT1 A 0 A_StopSound(8);
-		stop;
+	// playsgco:
+	// 	TNT1 A 8 A_StartSound("weapons/huntrackup",8);
+	// 	TNT1 A 0 A_StopSound(8);
+	// 	stop;
+	// playsgco2:
+	// 	TNT1 A 8 A_StartSound("weapons/huntrackdown",8);
+	// 	TNT1 A 0 A_StopSound(8);
+	// 	stop;
 	flash:
 		SHTF B 1 bright{
 			A_Light2();
@@ -433,32 +437,32 @@ class RI_khleb:HDShotgun{
 				else setweaponstate("nope");
 			}
 		}
-		SHTG AB 4 A_MuzzleClimb(frandom(.6,.7),-frandom(.6,.7));
+		SHTG AG 4 A_MuzzleClimb(frandom(.6,.7),-frandom(.6,.7));
 	reloadstarthand:
-		SHTG C 1 offset(0,36);
-		SHTG C 1 offset(0,38);
-		SHTG C 2 offset(0,36);
-		SHTG C 2 offset(0,34);
-		SHTG C 3 offset(0,36);
-		SHTG C 3 offset(0,40) A_CheckPocketSaddles();
-		SHTG C 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS,"reloadpocket");
+		SHTG H 1 offset(0,36);
+		SHTG H 1 offset(0,38);
+		SHTG H 2 offset(0,36);
+		SHTG H 2 offset(0,34);
+		SHTG H 3 offset(0,36);
+		SHTG H 3 offset(0,40) A_CheckPocketSaddles();
+		SHTG H 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS,"reloadpocket");
 	reloadfast:
-		SHTG C 4 offset(0,40) A_GrabShells(3,false);
-		SHTG C 3 offset(0,42) A_StartSound("weapons/pocket",9,volume:0.4);
-		SHTG C 3 offset(0,41);
+		SHTG H 4 offset(0,40) A_GrabShells(3,false);
+		SHTG H 3 offset(0,42) A_StartSound("weapons/pocket",9,volume:0.4);
+		SHTG H 3 offset(0,41);
 		goto reloadashell;
 	reloadpocket:
-		SHTG C 4 offset(0,39) A_GrabShells(3,false);
-		SHTG C 6 offset(0,40) A_JumpIf(health>40,1);
-		SHTG C 4 offset(0,40) A_StartSound("weapons/pocket",9);
-		SHTG C 8 offset(0,42) A_StartSound("weapons/pocket",9);
-		SHTG C 6 offset(0,41) A_StartSound("weapons/pocket",9);
-		SHTG C 6 offset(0,40);
+		SHTG H 4 offset(0,39) A_GrabShells(3,false);
+		// SHTG H 6 offset(0,40) A_JumpIf(health>40,1);
+		SHTG H 4 offset(0,40) A_StartSound("weapons/pocket",9);
+		SHTG H 8 offset(0,42) A_StartSound("weapons/pocket",9);
+		SHTG H 6 offset(0,41) A_StartSound("weapons/pocket",9);
+		SHTG H 6 offset(0,40);
 		goto reloadashell;
 	reloadashell:
-		SHTG C 2 offset(0,36);
-		SHTG C 4 offset(0,34)A_LoadTubeFromHand();
-		SHTG CCCCCC 1 offset(0,33){
+		SHTG H 2 offset(0,36);
+		SHTG H 4 offset(0,34)A_LoadTubeFromHand();
+		SHTG HHHHHH 1 offset(0,33){
 			if(
 				PressingReload()
 				||PressingAltReload()
@@ -487,10 +491,10 @@ class RI_khleb:HDShotgun{
 			else if(invoker.handshells<1)setweaponstate("reloadstarthand");
 		}goto reloadashell;
 	reloadend:
-		SHTG C 4 offset(0,34) A_StartSound("weapons/huntopen",8);
-		SHTG C 1 offset(0,36) EmptyHand(careful:true);
-		SHTG C 1 offset(0,34);
-		SHTG CBA 3;
+		SHTG H 4 offset(0,34) A_StartSound("weapons/huntopen",8);
+		SHTG H 1 offset(0,36) EmptyHand(careful:true);
+		SHTG H 1 offset(0,34);
+		SHTG HGA 3;
 		SHTG A 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_HOLDING,"nope");
 		goto ready;
 
@@ -535,17 +539,17 @@ class RI_khleb:HDShotgun{
 				&&invoker.weaponstatus[KHLEBS_TUBE]<1
 			)setweaponstate("nope");
 		}
-		SHTG BC 4 A_MuzzleClimb(frandom(1.2,2.4),-frandom(1.2,2.4));
-		SHTG C 1 offset(0,34);
-		SHTG C 1 offset(0,36) A_StartSound("weapons/huntopen",8);
-		SHTG C 1 offset(0,38);
-		SHTG C 4 offset(0,36){
+		SHTG GG 4 A_MuzzleClimb(frandom(1.2,2.4),-frandom(1.2,2.4));
+		SHTG H 1 offset(0,34);
+		SHTG H 1 offset(0,36) A_StartSound("weapons/huntopen",8);
+		SHTG H 1 offset(0,38);
+		SHTG H 4 offset(0,36){
 			A_MuzzleClimb(-frandom(1.2,2.4),frandom(1.2,2.4));
 			if(invoker.weaponstatus[KHLEBS_CHAMBER]<1){
 				setweaponstate("unloadtube");
-			}else A_StartSound("weapons/huntrack",8,CHANF_OVERLAP);
+			}else A_StartSound("weapons/huntrackbak",8,CHANF_OVERLAP);
 		}
-		SHTG D 8 offset(0,34){
+		SHTG I 8 offset(0,34){
 			A_MuzzleClimb(-frandom(1.2,2.4),frandom(1.2,2.4));
 			int chm=invoker.weaponstatus[KHLEBS_CHAMBER];
 			invoker.weaponstatus[KHLEBS_CHAMBER]=0;
@@ -570,12 +574,13 @@ class RI_khleb:HDShotgun{
 				0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 			);
 		}
-		SHTG C 0 A_JumpIf(!pressingunload(),"reloadend");
-		SHTG C 4 offset(0,40);
+		SHTG H 0 A_StartSound("weapons/huntrackfwd",8);
+		SHTG H 0 A_JumpIf(!pressingunload(),"reloadend");
+		SHTG H 4 offset(0,40);
 	unloadtube:
-		SHTG C 6 offset(0,40) EmptyHand(careful:true);
+		SHTG H 6 offset(0,40) EmptyHand(careful:true);
 	unloadloop:
-		SHTG C 8 offset(1,41){
+		SHTG H 8 offset(1,41){
 			if(invoker.weaponstatus[KHLEBS_TUBE]<1)setweaponstate("reloadend");
 			else if(invoker.handshells>=3)setweaponstate("unloadloopend");
 			else{
@@ -583,11 +588,11 @@ class RI_khleb:HDShotgun{
 				invoker.weaponstatus[KHLEBS_TUBE]--;
 			}
 		}
-		SHTG C 4 offset(0,40) A_StartSound("weapons/huntreload",8);
+		SHTG H 4 offset(0,40) A_StartSound("weapons/huntreload",8);
 		loop;
 	unloadloopend:
-		SHTG C 6 offset(1,41);
-		SHTG C 3 offset(1,42){
+		SHTG H 6 offset(1,41);
+		SHTG H 3 offset(1,42){
 			int rmm=HDPickup.MaxGive(self,"HDShellAmmo",ENC_SHELL);
 			if(rmm>0){
 				A_StartSound("weapons/pocket",9);
@@ -596,8 +601,8 @@ class RI_khleb:HDShotgun{
 				invoker.handshells=max(invoker.handshells-rmm,0);
 			}
 		}
-		SHTG C 0 EmptyHand(careful:true);
-		SHTG C 6 A_Jumpif(!pressingunload(),"reloadend");
+		SHTG H 0 EmptyHand(careful:true);
+		SHTG H 6 A_Jumpif(!pressingunload(),"reloadend");
 		goto unloadloop;
 	spawn:
 		HUNT ABCDEFG -1 nodelay{

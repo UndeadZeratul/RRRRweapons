@@ -10,9 +10,9 @@ class RIBrontoBuddy:Brontornis{
 		+hdweapon.fitsinbackpack
 		weapon.selectionorder 61;
 		scale 0.6;
-		inventory.pickupmessage "You got the Brontornis! It's got a neat bolt rack!";
+		inventory.pickupmessage "$PICKUP_BRONTOBUDDY";
 		hdweapon.barrelsize 24,1,3;
-		tag "Brontornis Cannon W/Bolt Rack";
+		tag "$TAG_BRONTOBUDDY";
 		hdweapon.refid RILD_BB;
 	}
 	action void A_UnloadSideSaddle(int slot){

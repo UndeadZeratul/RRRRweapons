@@ -1,0 +1,36 @@
+
+// Bronto-Buddy
+server bool brontobuddy_allowBackpacks          = true;
+server int  brontobuddy_spawn_bias              = 4;
+server bool brontobuddy_persistent_spawning     = false;
+
+// Khleb Pump-Action Shotgun
+server bool khleb_allowBackpacks                = false;
+server int  khleb_spawn_bias                    = -1;
+server bool khleb_persistent_spawning           = false;
+
+// Reaper Auto-Shotgun
+server bool reaper_allowBackpacks               = true;
+server int  reaper_hunter_spawn_bias            = 19;
+server int  reaper_slayer_spawn_bias            = 19;
+server bool reaper_persistent_spawning          = false;
+
+// Thompson
+server bool thompson_allowBackpacks             = true;
+server int  thompson_chaingun_spawn_bias        = 24;
+server bool thompson_persistent_spawning        = false;
+
+// Reaper 8-round Magazine
+server bool reapermag_allowBackpacks            = true;
+server int  reapermag_shellbox_spawn_bias       = 19;
+server bool reapermag_persistent_spawning       = false;
+
+// Reaper 20-round Drum Magazine
+server bool reaperdrummag_allowBackpacks        = true;
+server int  reaperdrummag_shellbox_spawn_bias   = 19;
+server bool reaperdrummag_persistent_spawning   = false;
+
+// Thompson 70-round Drum Magazine
+server bool thompsondrummag_allowBackpacks      = true;
+server int  thompsondrummag_clipmag_spawn_bias  = 29;
+server bool thompsondrummag_persistent_spawning = false;

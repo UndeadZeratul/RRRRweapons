@@ -8,7 +8,7 @@ class RIThompson:HDWeapon{
 		//$Title "TMPSN"
 		//$Sprite "TMPNA0"
 
-		obituary "%o found out what was in %k's violin case.";
+		obituary "$OB_THOMPSON";
 		weapon.selectionorder 291;
 		weapon.slotnumber 2;
 		weapon.kickback 30;
@@ -16,10 +16,10 @@ class RIThompson:HDWeapon{
 		weapon.bobrangey 0.6;
 		weapon.bobspeed 2.5;
 		scale 0.50;
-		inventory.pickupmessage "You got the Thompson SMG! Rata-tat-tat!";
+		inventory.pickupmessage "$PICKUP_THOMPSON";
 		hdweapon.barrelsize 30,1,3;
 		hdweapon.refid RILD_TMPSN;
-		tag "Thompson Submachine Gun (9mm Repro)";
+		tag "$TAG_THOMPSON";
 	}
 	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
 	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
@@ -65,9 +65,8 @@ class RIThompson:HDWeapon{
 			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RITmpsD70")));
 			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("HD9mMag30")));
 			if(weaponstatus[TMPS_BOXER]==1){
-//=============================================================
 				if(nextdrumloaded>=70){
-		sb.drawimage("TDRMD0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1.75,1.75));
+					sb.drawimage("TDRMD0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1.75,1.75));
 				}else if(nextdrumloaded<1){
 					sb.drawimage("TDRMC0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1.75,1.75));
 				}else sb.drawbar(
@@ -76,9 +75,8 @@ class RIThompson:HDWeapon{
 					(-61,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-			sb.drawnum(hpl.countinv("RITmpsD70"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-// -----------------------------------------------------
-			if(nextmagloaded>=30){
+				sb.drawnum(hpl.countinv("RITmpsD70"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextmagloaded>=30){
 					sb.drawimage("CLP3A0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(3,3));
 				}else if(nextmagloaded<1){
 					sb.drawimage("CLP3B0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(3,3));
@@ -88,24 +86,21 @@ class RIThompson:HDWeapon{
 					(-46,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-			sb.drawnum(hpl.countinv("HD9mMag30"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-//+++++++++++++++++++++++++++++++++++++++++++++++++
-			sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
-				-22,-12,"RBRSA3A7","STFULAUT"
-			);
-			for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
-				double RIrad=13; //circle radius
-				double RIx=(1);
-				double RIy=(.75*i);
-				sb.drawwepdot(-18,-27-(-RIy*1),(2,1));
-			}
-			if(hdw.weaponstatus[TMPS_CHAMBER]==2){sb.drawwepdot(-28,-17,(3,2));
+				sb.drawnum(hpl.countinv("HD9mMag30"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
+					-22,-12,"RBRSA3A7","STFULAUT"
+				);
+				for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
+					double RIrad=13; //circle radius
+					double RIx=(1);
+					double RIy=(.75*i);
+					sb.drawwepdot(-18,-27-(-RIy*1),(2,1));
+				}
+				if(hdw.weaponstatus[TMPS_CHAMBER]==2){sb.drawwepdot(-28,-17,(3,2));
 				}else if(hdw.weaponstatus[TMPS_CHAMBER]==1){sb.drawwepdot(-28,-22,(3,2));
 				}else{sb.drawwepdot(-28,-27,(3,2));
 				}
-//=======================================================
 			}else{
-//=======================================================
 				if(nextdrumloaded>=70){
 					sb.drawimage("TDRMD0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1.75,1.75));
 				}else if(nextdrumloaded<1){
@@ -116,9 +111,8 @@ class RIThompson:HDWeapon{
 					(-46,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-			sb.drawnum(hpl.countinv("RITmpsD70"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-// -----------------------------------------------------
-			if(nextmagloaded>=30){
+				sb.drawnum(hpl.countinv("RITmpsD70"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextmagloaded>=30){
 					sb.drawimage("CLP3A0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(3,3));
 				}else if(nextmagloaded<1){
 					sb.drawimage("CLP3B0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(3,3));
@@ -128,18 +122,17 @@ class RIThompson:HDWeapon{
 					(-61,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-			sb.drawnum(hpl.countinv("HD9mMag30"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-//+++++++++++++++++++++++++++++++++++++++++++++++++
-			sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
-				-20,-12,"RBRSA3A7","STFULAUT"
-			);
-			for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
-				double RIrad=13; //circle radius
-				double RIx=(RIrad-0)*cos((5.1428571428571428571428571428571*i)-90);
-				double RIy=(RIrad-0)*sin((5.1428571428571428571428571428571*i)-90);
-				sb.drawwepdot(-27-(RIx*1),-18-(-RIy*1),(2,2));
-			}
-			if(hdw.weaponstatus[TMPS_CHAMBER]==2){sb.drawwepdot(-26,-17,(3,2));
+				sb.drawnum(hpl.countinv("HD9mMag30"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
+					-20,-12,"RBRSA3A7","STFULAUT"
+				);
+				for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
+					double RIrad=13; //circle radius
+					double RIx=(RIrad-0)*cos((5.1428571428571428571428571428571*i)-90);
+					double RIy=(RIrad-0)*sin((5.1428571428571428571428571428571*i)-90);
+					sb.drawwepdot(-27-(RIx*1),-18-(-RIy*1),(2,2));
+				}
+				if(hdw.weaponstatus[TMPS_CHAMBER]==2){sb.drawwepdot(-26,-17,(3,2));
 				}else if(hdw.weaponstatus[TMPS_CHAMBER]==1){sb.drawwepdot(-26,-22,(3,2));
 				}else{sb.drawwepdot(-26,-27,(3,2));
 				}

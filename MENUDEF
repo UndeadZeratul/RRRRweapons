@@ -1,0 +1,193 @@
+OptionMenu "RRRRMenu" {
+
+    Title "$RRRR_MENU"
+
+	StaticText "$MENU_SHOTGUNS_TITLE", "Red"
+    StaticText ""
+    Submenu "$TAG_KHLEB", "khlebSpawning", 0, 1
+    StaticText ""
+    Submenu "$TAG_REAPER", "reaperSpawning", 0, 1
+	StaticText ""
+
+	StaticText "$MENU_MACHINEGUNS_TITLE", "Green"
+	StaticText ""
+	Submenu "$TAG_THOMPSON", "thompsonSpawning", 0, 1
+	StaticText ""
+
+	StaticText "$MENU_RIFLES_TITLE", "Orange"
+	StaticText ""
+    Submenu "$TAG_BRONTOBUDDY", "brontobuddySpawning", 0, 1
+	StaticText ""
+
+	StaticText "$MENU_RESETOPTIONS_TITLE", "Red"
+	StaticText ""
+	SafeCommand "$RRRR_RESETALLOPTIONS", "RRRR_Reset_Cvars"
+}
+
+AddOptionMenu "OptionsMenu" {
+	Submenu "$RRRR_MENU", "RRRRMenu"
+}
+
+AddOptionMenu "HDAddonMenu" {
+	Submenu "$RRRR_MENU", "RRRRMenu"
+}
+
+
+// Shotguns
+
+OptionMenu "khlebSpawning" {
+    Title "$MENU_KHLEB_TITLE"
+
+   	StaticText "$MENU_NOTICE", "Red"
+    StaticText "$MENU_SPAWNRATE_TEXT1", "White"
+    StaticText "$MENU_SPAWNRATE_TEXT2", "White"
+    StaticText ""
+
+	StaticText "$MENU_SPAWNOPTIONS", "Red"
+    StaticText "$MENU_KHLEB_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_WEPSPAWNRATE", "khleb_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETWEP", "resetcvar khleb_hunter_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_KHLEB_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "khleb_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_PERSISTENCYOPTIONS", "Red"
+    StaticText "$MENU_PERSISTENCY_TEXT", "White"
+	Option "$MENU_PERSISTENCY", "khleb_persistent_spawning", "OnOff"
+	SafeCommand "$MENU_RESETPERSISTENCY", "resetcvar khleb_persistent_spawning"
+ 	StaticText ""
+   	StaticText ""
+
+	StaticText "$MENU_RESETOPTIONS", "Red"
+	SafeCommand "$MENU_RESETALLOPTIONS", "khleb_reset_cvars"
+}
+
+OptionMenu "reaperSpawning" {
+    Title "$MENU_REAPER_TITLE"
+
+   	StaticText "$MENU_NOTICE", "Red"
+    StaticText "$MENU_SPAWNRATE_TEXT1", "White"
+    StaticText "$MENU_SPAWNRATE_TEXT2", "White"
+    StaticText ""
+
+	StaticText "$MENU_WEPSPAWNOPTIONS", "Red"
+    StaticText "$MENU_REAPER_HUNTER_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_WEPSPAWNRATE", "reaper_hunter_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETWEP", "resetcvar reaper_hunter_spawn_bias"
+    StaticText "$MENU_REAPER_SLAYER_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_WEPSPAWNRATE", "reaper_slayer_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETWEP", "resetcvar reaper_slayer_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_REAPER_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "reaper_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_MAGSPAWNOPTIONS", "Red"
+    StaticText "$MENU_REAPERMAG_SHELLBOX_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_MAGSPAWNRATE", "reapermag_shellbox_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETMAG", "resetcvar reapermag_shellbox_spawn_bias"
+    StaticText ""
+
+	StaticText "$MENU_REAPERMAG_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "reapermag_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+    StaticText "$MENU_REAPERDRUMMAG_SHELLBOX_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_MAGSPAWNRATE", "reaperdrummag_shellbox_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETMAG", "resetcvar reaperdrummag_shellbox_spawn_bias"
+    StaticText ""
+
+	StaticText "$MENU_REAPERDRUMMAG_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "reaperdrummag_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_PERSISTENCYOPTIONS", "Red"
+    StaticText "$MENU_PERSISTENCY_TEXT", "White"
+	Option "$MENU_WEPPERSISTENCY", "reaper_persistent_spawning", "OnOff"
+	Option "$MENU_REAPERMAG_PERSISTENCY", "reapermag_persistent_spawning", "OnOff"
+	Option "$MENU_REAPERDRUMMAG_PERSISTENCY", "reaperdrummag_persistent_spawning", "OnOff"
+	SafeCommand "$MENU_RESETPERSISTENCY", "resetcvar reaper_persistent_spawning; resetcvar reapermag_persistent_spawning; resetcvar reaperdrummag_persistent_spawning"
+ 	StaticText ""
+   	StaticText ""
+
+	StaticText "$MENU_RESETOPTIONS", "Red"
+	SafeCommand "$MENU_RESETALLOPTIONS", "reaper_reset_cvars"
+}
+
+
+// Machine Guns
+
+OptionMenu "thompsonSpawning" {
+    Title "$MENU_THOMPSON_TITLE"
+
+   	StaticText "$MENU_NOTICE", "Green"
+    StaticText "$MENU_SPAWNRATE_TEXT1", "White"
+    StaticText "$MENU_SPAWNRATE_TEXT2", "White"
+    StaticText ""
+
+	StaticText "$MENU_SPAWNOPTIONS", "Green"
+    StaticText "$MENU_THOMPSON_CHAINGUN_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_WEPSPAWNRATE", "thompson_chaingun_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETWEP", "resetcvar thompson_chaingun_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_THOMPSON_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "thompson_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_MAGSPAWNOPTIONS", "Green"
+    StaticText "$MENU_THOMPSONDRUMMAG_CLIPMAG_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_MAGSPAWNRATE", "thompsondrummag_clipmag_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETMAG", "resetcvar thompsondrummag_clipmag_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_THOMPSONDRUMMAG_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "thompsondrummag_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_PERSISTENCYOPTIONS", "Green"
+    StaticText "$MENU_PERSISTENCY_TEXT", "White"
+	Option "$MENU_WEPPERSISTENCY", "thompson_persistent_spawning", "OnOff"
+	Option "$MENU_MAGPERSISTENCY", "thompsondrummag_persistent_spawning", "OnOff"
+	SafeCommand "$MENU_RESETPERSISTENCY", "resetcvar thompson_persistent_spawning; resetcvar thompsondrummag_persistent_spawning"
+ 	StaticText ""
+   	StaticText ""
+
+	StaticText "$MENU_RESETOPTIONS", "Green"
+	SafeCommand "$MENU_RESETALLOPTIONS", "thompson_reset_cvars"
+}
+
+
+// Rifles
+
+OptionMenu "brontobuddySpawning" {
+    Title "$MENU_BRONTOBUDDY_TITLE"
+
+   	StaticText "$MENU_NOTICE", "Orange"
+    StaticText "$MENU_SPAWNRATE_TEXT1", "White"
+    StaticText "$MENU_SPAWNRATE_TEXT2", "White"
+    StaticText ""
+
+	StaticText "$MENU_SPAWNOPTIONS", "Orange"
+    StaticText "$MENU_BRONTOBUDDY_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_WEPSPAWNRATE", "brontobuddy_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETWEP", "resetcvar brontobuddy_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_BRONTOBUDDY_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "brontobuddy_allowBackpacks", "OnOff"
+ 	StaticText ""
+
+	StaticText "$MENU_PERSISTENCYOPTIONS", "Orange"
+    StaticText "$MENU_PERSISTENCY_TEXT", "White"
+	Option "$MENU_PERSISTENCY", "brontobuddy_persistent_spawning", "OnOff"
+	SafeCommand "$MENU_RESETPERSISTENCY", "resetcvar brontobuddy_persistent_spawning"
+ 	StaticText ""
+   	StaticText ""
+
+	StaticText "$MENU_RESETOPTIONS", "Orange"
+	SafeCommand "$MENU_RESETALLOPTIONS", "brontobuddy_reset_cvars"
+}

@@ -9,7 +9,7 @@ class RIReaper:HDWeapon{
 		//$Title "REAPR"
 		//$Sprite "ASHTA0"
 
-		obituary "%k called a %o harvest.";
+		obituary "$OB_REAPER";
 		weapon.selectionorder 351;
 		weapon.slotnumber 3;
 		weapon.kickback 30;
@@ -17,11 +17,11 @@ class RIReaper:HDWeapon{
 		weapon.bobrangey 0.8;
 		weapon.bobspeed 2.5;
 		scale 0.50;
-		inventory.pickupmessage "You got the Reaper Automatic Shotgun!";
+		inventory.pickupmessage "$PICKUP_REAPER";
 		hdweapon.barrelsize 29,1,3;
 		inventory.icon "ASHTA0";
 		hdweapon.refid RILD_REAP;
-		tag "Reaper Automatic Shotgun";
+		tag "$TAG_REAPER";
 	}
 //=========================================
 	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}

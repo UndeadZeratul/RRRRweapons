@@ -25,8 +25,8 @@ class RITmpsD70:HD9mMag15{
 		hdmagammo.roundtype "HDPistolAmmo";
 		hdmagammo.roundbulk ENC_9_LOADED;
 		hdmagammo.magbulk ENC_TMPS_DRM_EMPTY;
-		tag "Thompson Drum";
-		inventory.pickupmessage "Picked up a 9mm Drum magazine.";
+		tag "$TAG_THOMPSON_DRUMMAG";
+		inventory.pickupmessage "$PICKUP_THOMPSON_DRUMMAG";
 		hdpickup.refid RILD_TMPDRM;
 	}
 	override bool Extract(){
@@ -40,7 +40,7 @@ class RITmpsD70:HD9mMag15{
 		HDF.Give(owner,roundtype,1);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]--;
-//		extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
+		// extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
 		if(mags[mindex]>=60){
 			extracttime=10;
 		}else if(mags[mindex]>=50){
@@ -72,7 +72,7 @@ class RITmpsD70:HD9mMag15{
 		owner.A_TakeInventory(roundtype,1,TIF_NOTAKEINFINITE);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]++;
-//		inserttime=6+(mags[mindex]*0.1);
+		// inserttime=6+(mags[mindex]*0.1);
 		if(mags[mindex]>=60){
 			inserttime=10;
 		}else if(mags[mindex]>=50){
@@ -108,7 +108,7 @@ class RITmpsD70:HD9mMag15{
 		else if(fmag==3)magsprite="TDRMW0";
 		else if(fmag==4)magsprite="TDRMV0";
 		else magsprite="TDRMV0";
-		return magsprite,"PBRSA0","HDPistolAmmo",1.5;
+		return magsprite,"PRNDA0","HDPistolAmmo",1.5;
 	}
 	states{
 	spawn:
@@ -144,8 +144,8 @@ class RIReapD20:HD9mMag15{
 		hdmagammo.roundtype "HDShellAmmo";
 		hdmagammo.roundbulk ENC_SHELLLOADED;
 		hdmagammo.magbulk ENC_AST_DRM_EMPTY;
-		tag "Reaper Drum";
-		inventory.pickupmessage "Picked up a 12 Gauge Drum Magazine.";
+		tag "$TAG_REAPER_DRUMMAG";
+		inventory.pickupmessage "$PICKUP_REAPER_DRUMMAG";
 		hdpickup.refid RILD_ASTDRM;
 	}
 	override void GetItemsThatUseThis(){
@@ -168,7 +168,7 @@ class RIReapD20:HD9mMag15{
 		HDF.Give(owner,roundtype,1);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]--;
-//		extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
+		// extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
 		if(mags[mindex]>=17){
 			extracttime=10;
 		}else if(mags[mindex]>=13){
@@ -196,7 +196,7 @@ class RIReapD20:HD9mMag15{
 		owner.A_TakeInventory(roundtype,1,TIF_NOTAKEINFINITE);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]++;
-//		inserttime=6+(mags[mindex]*0.1);
+		// inserttime=6+(mags[mindex]*0.1);
 		if(mags[mindex]>=17){
 			inserttime=10;
 		}else if(mags[mindex]>=13){
@@ -236,7 +236,7 @@ class RIReapD20:HD9mMag15{
 		else if(thismagamt==19)magsprite="RPRDT0";
 		else if(thismagamt==20)magsprite="RPRDU0";
 		else magsprite="RPRDA0";
-		return magsprite,"SHELA0","HDShellAmmo",.60;
+		return magsprite,"SHL1A0","HDShellAmmo",.60;
 	}
 	states{
 	cacheSprites:
@@ -294,8 +294,8 @@ class RIReapM8:HD9mMag15{
 		hdmagammo.roundtype "HDShellAmmo";
 		hdmagammo.roundbulk ENC_SHELLLOADED;
 		hdmagammo.magbulk ENC_AST_STK_EMPTY;
-		tag "Reaper Magazine";
-		inventory.pickupmessage "Picked up a 12 Gauge Magazine.";
+		tag "$TAG_REAPER_MAG";
+		inventory.pickupmessage "$PICKUP_REAPER_MAG";
 		hdpickup.refid RILD_ASTSTK;
 	}
 	override void GetItemsThatUseThis(){
