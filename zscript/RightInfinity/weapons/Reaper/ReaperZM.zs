@@ -11,36 +11,26 @@ class RIReaperZM:RIReaper{
 		//$Sprite "ASHTR0"
 
 		obituary "$OB_REAPER_ZM";
-		weapon.selectionorder 351;
-		weapon.slotnumber 3;
-		weapon.kickback 30;
-		weapon.bobrangex 0.3;
-		weapon.bobrangey 0.8;
-		weapon.bobspeed 2.5;
-		scale 0.50;
 		inventory.pickupmessage "$PICKUP_REAPER_ZM";
-		hdweapon.barrelsize 29,1,3;
 		inventory.icon "ASHRE0";
 		hdweapon.refid RILD_REAPZM;
 		tag "$TAG_REAPER_ZM";
 	}
+
 	override void tick(){
 		super.tick();
 		drainheat(ASHTS_HEAT,12);
 	}
 
-	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
-	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
-
 	override double gunmass(){
-	return 9+(weaponstatus[ASHTS_MAG]*0.2)+(weaponstatus[ASHTS_ZMAG]*0.02);
+	return super.gunmass() + 1 + (weaponstatus[ASHTS_ZMAG]*0.02);
 	}
 
 	override double weaponbulk(){
-		double blx=155;
-		int mgg=weaponstatus[ASHTS_MAG];
+		double blx=super.weaponbulk() + 25;
 		int mgz=weaponstatus[ASHTS_ZMAG];
-		return blx+(mgg<0?0:(ENC_AST_DRM_LOADED+mgg*ENC_SHELLLOADED))+(mgz<0?0:(mgz*ENC_426_LOADED));
+
+		return blx + (mgz<0?0:(mgz*ENC_426_LOADED));
 	}
 
 	//returns the power of the load just fired
@@ -59,22 +49,13 @@ class RIReaperZM:RIReaper{
 		speedfactor*=shotpower;
 		HDBulletActor.FireBullet(caller,"HDB_wad");
 		let p=HDBulletActor.FireBullet(caller,"HDB_00",
-			spread:spread,speedfactor:speedfactor,amount:7
+			spread:spread,speedfactor:speedfactor,amount:10
 		);
 		distantnoise.make(p,"world/shotgunfar");
 		caller.A_StartSound("weapons/rprbang",CHAN_WEAPON);
 		return shotpower;
 	}
-	action void A_FireReaper(){
-		double shotpower=invoker.Fire(self);
-		A_GunFlash();
-		vector2 shotrecoil=(randompick(-1,1)*1.4,-3.4);
-		if(invoker.weaponstatus[ASHTS_AUTO]>0)shotrecoil=(randompick(-1,1)*1.4,-3.4);
-		shotrecoil*=shotpower;
-		A_MuzzleClimb(0,0,shotrecoil.x,shotrecoil.y,randompick(-1,1)*shotpower,-0.3*shotpower);
-		invoker.weaponstatus[ASHTS_CHAMBER]=3;
-		invoker.shotpower=shotpower;
-	}
+
 	action bool brokenround(){
 		if(!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_CHAMBERBROKEN)){
 			int rnd=
@@ -85,21 +66,6 @@ class RIReaperZM:RIReaper{
 				invoker.weaponstatus[ASHTS_FLAGS]|=ASHTF_CHAMBERBROKEN;
 			}
 		}return invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_CHAMBERBROKEN;
-	}
-	override void failedpickupunload(){
-		failedpickupunloadmag(ASHTS_MAG,"RIReapD20");
-	}
-	override void DropOneAmmo(int amt){
-		if(owner){
-			amt=clamp(amt,1,10);
-			if(owner.countinv("HDShellAmmo"))owner.A_DropInventory("HDShellAmmo",amt*20);
-			else owner.A_DropInventory("RIReapD20",amt);
-		}
-	}
-	override void ForceBasicAmmo(){
-		owner.A_TakeInventory("HDShellAmmo");
-		owner.A_TakeInventory("RIReapD20");
-		owner.A_GiveInventory("RIReapD20");
 	}
 
 	override string,double getpickupsprite(){
@@ -116,139 +82,42 @@ class RIReaperZM:RIReaper{
 
 		return spr.."0",1.;
 	}
+
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
+		super.DrawHUDStuff(sb, hdw, hpl);
+
 		if(sb.hudlevel == 1){
-			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapD20")));
-			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapM8")));
 			
-			if(weaponstatus[ASHTS_BOXER]==0){
-				if(nextdrumloaded>=20){
-					sb.drawimage("ASDMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextdrumloaded<1){
-					sb.drawimage("ASDMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASDMNORM","ASDMGREY",
-					nextdrumloaded,20,
-					(-51,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapD20"),-48,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				if(nextmagloaded>=8){
-					sb.drawimage("ASSMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextmagloaded<1){
-					sb.drawimage("ASSMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASSMNORM","ASSMGREY",
-					nextmagloaded,20,
-					(-79,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapM8"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				
-				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-19,-17,"RBRSA3A7","STFULAUT"
-				);
-				
-				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-					for(int i=hdw.weaponstatus[ASHTS_MAG]-1;i>0;i--){
-					double RIrad=13; //circle radius
-					double RIx=(RIrad-0)*cos((18*i)-95);
-					double RIy=(RIrad-0)*sin((18*i)-95);
-					sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
-					}
-				}else{
-					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-					double RIrad=13; //circle radius
-					double RIx=(RIrad-0)*cos((18*i)-90);
-					double RIy=(RIrad-0)*sin((18*i)-90);
-					sb.drawwepdot(-27-(-RIx*1),-23-(-RIy*1),(2,2));
-					}
-				}
+			// Draw Extra 4.26mm Mags
+			int ZMnextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("HD4mMag")));
+			if(ZMnextmagloaded>50){
+				sb.drawimage("ZMAGA0",(-74,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(2,2));
+			}else if(ZMnextmagloaded<1){
+				sb.drawimage("ZMAGC0",(-74,-4),sb.DI_SCREEN_CENTER_BOTTOM,alpha:ZMnextmagloaded?0.6:1.,scale:(2,2));
+			}else sb.drawbar(
+				"ZMAGNORM","ZMAGGREY",
+				ZMnextmagloaded,50,
+				(-74,-4),-1,
+				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
+			);
+			sb.drawnum(hpl.countinv("HD4mMag"),-73,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
-			}else{
-
-				if(nextmagloaded>=8){
-					sb.drawimage("ASSMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextmagloaded<1){
-					sb.drawimage("ASSMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASSMNORM","ASSMGREY",
-					nextmagloaded,20,
-					(-51,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapM8"),-49,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				if(nextdrumloaded>=20){
-					sb.drawimage("ASDMB0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextdrumloaded<1){
-					sb.drawimage("ASDMA0",(-79,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASDMNORM","ASDMGREY",
-					nextdrumloaded,20,
-					(-79,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapD20"),-77,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-
-				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-23,-17,"RBRSA3A7","STFULAUT"
-				);
-				//straight
-				if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-					double RIrad=37; //circle radius
-					double RIx=(RIrad-0)*cos((3*i)-0);
-					double RIy=(3*i)-90;
-					sb.drawwepdot(-51-(-RIx*1),53-(-RIy*1),(2,2));
-					sb.drawwepdot(-54-(-RIx*1),53-(-RIy*1),(4,2));
-					}
-				}else{
-					for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-					double RIrad=37; //circle radius
-					double RIx=(RIrad-0)*cos((3*i)-0);
-					double RIy=(3*i)-90;
-					sb.drawwepdot(-51-(-RIx*1),54-(-RIy*1),(2,2));
-					sb.drawwepdot(-54-(-RIx*1),54-(-RIy*1),(4,2));
-					}
-				}
+			// Draw ZM Ammo
+			int lod=clamp(hdw.weaponstatus[ASHTS_ZMAG]%100,0,50);
+			if(hdw.weaponstatus[ASHTS_ZMAG]>100){
+				lod=random[shitgun](10,99);
 			}
+
+			sb.drawnum(lod,-16,-10,sb.DI_SCREEN_CENTER_BOTTOM|sb.DI_TEXT_ALIGN_RIGHT,Font.CR_RED);
+			sb.drawwepcounter(
+				hdw.weaponstatus[ASHTS_ZAUTO],
+				-24,-5,
+				"RBRSA3A7","STFULAUT","STBURAUT"
+			);
+			sb.drawwepnum(lod,50,posy:-2);
 		}
-		if(hdw.weaponstatus[ASHTS_CHAMBER]==3){
-			sb.drawwepdot(-26,-25,(3,5));
-			sb.drawwepdot(-26,-22,(3,2));
-		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-			sb.drawwepdot(-26,-25,(3,2));
-			sb.drawwepdot(-26,-22,(3,2));
-		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==1)
-			{sb.drawwepdot(-26,-22,(3,2));}
-		
-		//WHAT
-		if(hdw.weaponstatus[0]&ASHTF_GZCHAMBER){
-			sb.drawwepdot(-16,-11,(3,1));
-		}
-		
-		int lod=clamp(hdw.weaponstatus[ASHTS_ZMAG]%100,0,50);
-		if(hdw.weaponstatus[ASHTS_ZMAG]>100)lod=random[shitgun](10,99);
-		sb.drawnum(lod,-16,-10,sb.DI_SCREEN_CENTER_BOTTOM|sb.DI_TEXT_ALIGN_RIGHT,Font.CR_RED);
-				sb.drawwepcounter(hdw.weaponstatus[ASHTS_ZAUTO],
-			-24,-5,"RBRSA3A7","STFULAUT","STBURAUT"
-		);
-		sb.drawwepnum(lod,50,posy:-2);
-		
-		int ZMnextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("HD4mMag")));
-		if(ZMnextmagloaded>50){
-			sb.drawimage("ZMAGA0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(2,2));
-		}else if(ZMnextmagloaded<1){
-			sb.drawimage("ZMAGC0",(-65,-4),sb.DI_SCREEN_CENTER_BOTTOM,alpha:ZMnextmagloaded?0.6:1.,scale:(2,2));
-		}else sb.drawbar(
-			"ZMAGNORM","ZMAGGREY",
-			ZMnextmagloaded,50,
-			(-65,-4),-1,
-			sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-		);
-		sb.drawnum(hpl.countinv("HD4mMag"),-64,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 	}
-	
+
 	override string gethelptext(){
 		return
 		WEPHELP_FIRESHOOT
@@ -310,25 +179,15 @@ class RIReaperZM:RIReaper{
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE,"deselect0rigren");
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		goto deselect0big;
-	select0rigren:
-		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		goto select0big;
-	deselect0rigren:
-		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		goto deselect0big;
 	ready:
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE, 3);
-		#### # 0{
-			if(
-				invoker.weaponstatus[ASHTS_HEAT]>RILD_RPRZMCOOKOFF    
-				&&invoker.weaponstatus[0]&ASHTF_GZCHAMBER
-				&&!(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN)
-			){
-				setweaponstate("cookoff");
-				return;
-			}
-		}
+		#### # 0 A_JumpIf(
+			invoker.weaponstatus[ASHTS_HEAT]>RILD_RPRZMCOOKOFF    
+			&&invoker.weaponstatus[0]&ASHTF_GZCHAMBER
+			&&!(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN),
+			'cookoff'
+		);
 		#### # 1{
 			A_SetCrosshair(21);
 			A_WeaponReady(WRF_ALL);
@@ -354,8 +213,11 @@ class RIReaperZM:RIReaper{
 	
 	user3:
 		#### # 3;
-		#### # 0 { if(PressingReload())setweaponstate("reloadselect");
-					}
+		#### # 0 {
+			if(PressingReload()){
+				setweaponstate("reloadselect");
+			}
+		}
 		#### # 0 A_JumpIf(invoker.weaponstatus[0]&ASHTF_GLMODE, 3);
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_BOXER]==1, 4);
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
@@ -383,20 +245,6 @@ class RIReaperZM:RIReaper{
 			else invoker.weaponstatus[ASHTS_ZAUTO]++;
 			A_WeaponReady(WRF_NONE);
 		}goto nope;
-	fire:
-		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		#### # 0{
-			if(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE)setweaponstate("fireZM");
-		}goto fire2;
-	fireZM:
-		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		#### # 2 {
-		if(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN){
-				setweaponstate("nope");
-			}
-			if(invoker.weaponstatus[ZM66S_AUTO])A_SetTics(3);
-		}
-		goto shootgun;
 	hold:
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		#### # 0 A_JumpIf(invoker.weaponstatus[0]&ASHTF_GLMODE, 2);
@@ -414,19 +262,36 @@ class RIReaperZM:RIReaper{
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO]>4,"nope");
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO],"shootgun");
 		goto nope;
+	fire:
+		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
+		#### # 0{
+			if(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE)setweaponstate("fireZM");
+		}goto fire2;
+	fireZM:
+		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
+		#### # 2 {
+		if(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN){
+				setweaponstate("nope");
+			}
+			if(invoker.weaponstatus[ZM66S_AUTO])A_SetTics(3);
+		}
+		goto shootgun;
 	user4:
 	unload:
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		#### # 0{
 			invoker.weaponstatus[ASHTS_FLAGS]|=ASHTF_JUSTUNLOAD;
-			if(invoker.weaponstatus[0]&ASHTF_GLMODE){setweaponstate("zmunload");
+			if(invoker.weaponstatus[0]&ASHTF_GLMODE){
+				setweaponstate("zmunload");
 			}else if(invoker.weaponstatus[ASHTS_MAG]>=0){
 				if(invoker.weaponstatus[ASHTS_BOXER]>0){
 				setweaponstate("boxout");
 				}else{
 				setweaponstate("unmag");
 				}
-			}else if(invoker.weaponstatus[ASHTS_CHAMBER]>0){setweaponstate("prechamber");}
+			}else if(invoker.weaponstatus[ASHTS_CHAMBER]>0){
+				setweaponstate("prechamber");
+			}
 		}goto nope;
 	altfire:
 		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
@@ -437,11 +302,6 @@ class RIReaperZM:RIReaper{
 			A_SetHelpText();
 		}goto nope;
 	
-	althold:
-		---- A 1;
-		---- A 0 A_Refire();
-		goto ready;
-
 	ZMflash:
 		ASTM JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		#### # 1 bright{
@@ -541,7 +401,6 @@ class RIReaperZM:RIReaper{
 		}stop;
 	cookoff:
 		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-//		#### # 0 A_Log("reload shart",true);
 		#### # 0{
 			A_ClearRefire();
 			if(
@@ -843,33 +702,8 @@ class RIReaperZM:RIReaper{
 	}
 	
 	override void InitializeWepStats(bool idfa){
+		super.InitializeWepStats(idfa);
 		weaponstatus[ASHTS_FLAGS]|=ASHTF_GZCHAMBER;
 		weaponstatus[ASHTS_ZMAG]=51;
-		weaponstatus[ASHTS_MAG]=20;
-		weaponstatus[ASHTS_CHAMBER]=3;
-		weaponstatus[ASHTS_BOXER]=0;
-		weaponstatus[ASHTS_BOXEE]=0;
-		if(!idfa)weaponstatus[ASHTS_AUTO]=0;
 	}
 }
-	
-//		ASHTF_JUSTUNLOAD 1
-//	ASHTF_GLMODE=2,
-//	ASHTF_GZCHAMBER=4,
-//	ASHTF_CHAMBERBROKEN=8,
-//	ASHTF_DIRTYMAG=16,
-//	ASHTF_STILLPRESSINGRELOAD=32,
-//	ASHTF_LOADINGDIRTY=64,
-
-//		ASHTS_FLAGS 0
-//		ASHTS_MAG 1 //-1 unmagged
-//		ASHTS_CHAMBER 2 //0 empty, 1 spent, 2 animate, 3 loaded
-//		ASHTS_AUTO 3 //0 semi, 1 burst, 2 auto
-//		ASHTS_CHOKE 4
-//	ASHTS_HEAT=5
-//	ASHTS_ZMAG=6
-//	ASHTS_ZAUTO=7
-// ASHTS_BOXER=8
-//	ASHTS_BOXEE=9
-//	ASHTS_SIGHTS=10
-

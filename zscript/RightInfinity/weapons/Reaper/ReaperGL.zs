@@ -10,32 +10,21 @@ class RIReaperGL:RIReaper{
 		//$Sprite "ASHGA0"
 
 		obituary "$OB_REAPER_GL";
-		weapon.selectionorder 351;
-		weapon.slotnumber 3;
-		weapon.kickback 30;
-		weapon.bobrangex 0.3;
-		weapon.bobrangey 0.8;
-		weapon.bobspeed 2.5;
-		scale 0.50;
 		inventory.pickupmessage "$PICKUP_REAPER_GL";
-		hdweapon.barrelsize 29,1,3;
 		inventory.icon "ASHGA0";
 		hdweapon.refid RILD_REAPGL;
 		tag "$TAG_REAPER_GL";
 	}
 
-	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
-	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
-
 	override double gunmass(){
-	return 9+weaponstatus[ASHTS_MAG]*0.3+(weaponstatus[0]&ASHTF_GZCHAMBER?1.:0.);
+		return super.gunmass() + 1 + (weaponstatus[0]&ASHTF_GZCHAMBER ? 1.0 : 0.0);
 	}
 
 	override double weaponbulk(){
-		double blx=155;
-		if(weaponstatus[0]&ASHTF_GZCHAMBER)blx+=ENC_ROCKETLOADED;
-		int mgg=weaponstatus[ASHTS_MAG];
-		return blx+(mgg<0?0:(ENC_AST_DRM_LOADED+mgg*ENC_SHELLLOADED));
+		double blx=super.weaponbulk() + 25;
+		bool mgl=weaponstatus[0]&ASHTF_GZCHAMBER;
+
+		return blx + (mgl?ENC_ROCKETLOADED:0.);
 	}
 
 	//returns the power of the load just fired
@@ -54,37 +43,11 @@ class RIReaperGL:RIReaper{
 		speedfactor*=shotpower;
 		HDBulletActor.FireBullet(caller,"HDB_wad");
 		let p=HDBulletActor.FireBullet(caller,"HDB_00",
-			spread:spread,speedfactor:speedfactor,amount:7
+			spread:spread,speedfactor:speedfactor,amount:10
 		);
 		distantnoise.make(p,"world/shotgunfar");
 		caller.A_StartSound("weapons/rprbang",CHAN_WEAPON);
 		return shotpower;
-	}
-	action void A_FireReaper(){
-		double shotpower=invoker.Fire(self);
-		A_GunFlash();
-		vector2 shotrecoil=(randompick(-1,1)*1.4,-3.4);
-		if(invoker.weaponstatus[ASHTS_AUTO]>0)shotrecoil=(randompick(-1,1)*1.4,-3.4);
-		shotrecoil*=shotpower;
-		A_MuzzleClimb(0,0,shotrecoil.x,shotrecoil.y,randompick(-1,1)*shotpower,-0.3*shotpower);
-		invoker.weaponstatus[ASHTS_CHAMBER]=3;
-		invoker.shotpower=shotpower;
-	}
-
-	override void failedpickupunload(){
-		failedpickupunloadmag(ASHTS_MAG,"RIReapD20");
-	}
-	override void DropOneAmmo(int amt){
-		if(owner){
-			amt=clamp(amt,1,10);
-			if(owner.countinv("HDShellAmmo"))owner.A_DropInventory("HDShellAmmo",amt*20);
-			else owner.A_DropInventory("RIReapD20",amt);
-		}
-	}
-	override void ForceBasicAmmo(){
-		owner.A_TakeInventory("HDShellAmmo");
-		owner.A_TakeInventory("RIReapD20");
-		owner.A_GiveInventory("RIReapD20");
 	}
 
 	override string,double getpickupsprite(){
@@ -103,118 +66,36 @@ class RIReaperGL:RIReaper{
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
-		if(sb.hudlevel==1){
-			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapD20")));
-			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapM8")));
-			
-			if(weaponstatus[ASHTS_BOXER]==0){
-				if(nextdrumloaded>=20){
-					sb.drawimage("ASDMB0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextdrumloaded<1){
-					sb.drawimage("ASDMA0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASDMNORM","ASDMGREY",
-					nextdrumloaded,20,
-					(-46,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapD20"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				if(nextmagloaded>=8){
-					sb.drawimage("ASSMB0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-				}else if(nextmagloaded<1){
-					sb.drawimage("ASSMA0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-				}else sb.drawbar(
-					"ASSMNORM","ASSMGREY",
-					nextmagloaded,20,
-					(-61,-3),-1,
-					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-				);
-				sb.drawnum(hpl.countinv("RIReapM8"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				
-				sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-					-20,-12,"RBRSA3A7","STFULAUT"
-				);
-				
-			if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-				for(int i=hdw.weaponstatus[ASHTS_MAG]-1;i>0;i--){
-				double RIrad=13; //circle radius
-				double RIx=(RIrad-0)*cos((18*i)-95);
-				double RIy=(RIrad-0)*sin((18*i)-95);
-				sb.drawwepdot(-27-(-RIx*1),-18-(-RIy*1),(2,2));
-				}
-			}else{
-				for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-				double RIrad=13; //circle radius
-				double RIx=(RIrad-0)*cos((18*i)-90);
-				double RIy=(RIrad-0)*sin((18*i)-90);
-				sb.drawwepdot(-27-(-RIx*1),-18-(-RIy*1),(2,2));
-				}
-			}
+		super.DrawHUDStuff(sb, hdw, hpl);
 
-		}else{
-		if(nextmagloaded>=8){
-				sb.drawimage("ASSMB0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextmagloaded<1){
-				sb.drawimage("ASSMA0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASSMNORM","ASSMGREY",
-				nextmagloaded,20,
-				(-46,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapM8"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-			if(nextdrumloaded>=20){
-				sb.drawimage("ASDMB0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
-			}else if(nextdrumloaded<1){
-				sb.drawimage("ASDMA0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
-			}else sb.drawbar(
-				"ASDMNORM","ASDMGREY",
-				nextdrumloaded,20,
-				(-61,-3),-1,
-				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
-			);
-			sb.drawnum(hpl.countinv("RIReapD20"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-
-			sb.drawwepcounter(hdw.weaponstatus[ASHTS_AUTO],
-				-24,-12,"RBRSA3A7","STFULAUT"
-			);
-			//straight
-		if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-			for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-			double RIrad=37; //circle radius
-			double RIx=(RIrad-0)*cos((3*i)-0);
-			double RIy=(3*i)-90;
-			sb.drawwepdot(-51-(-RIx*1),63-(-RIy*1),(2,2));
-			sb.drawwepdot(-54-(-RIx*1),63-(-RIy*1),(4,2));
-			}
-		}else{
-			for(int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--){
-			double RIrad=37; //circle radius
-			double RIx=(RIrad-0)*cos((3*i)-0);
-			double RIy=(3*i)-90;
-			sb.drawwepdot(-51-(-RIx*1),64-(-RIy*1),(2,2));
-			sb.drawwepdot(-54-(-RIx*1),64-(-RIy*1),(4,2));
-			}
-		}
-	}
-	}
-			if(hdw.weaponstatus[ASHTS_CHAMBER]==3){
-				sb.drawwepdot(-30,-20,(3,5));
-				sb.drawwepdot(-30,-17,(3,2));
-			}else if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
-				sb.drawwepdot(-30,-20,(3,2));
-				sb.drawwepdot(-30,-17,(3,2));
-			}else if(hdw.weaponstatus[ASHTS_CHAMBER]==1)
-				{sb.drawwepdot(-30,-17,(3,2));}
-		//WHAT
-		if(hdw.weaponstatus[0]&ASHTF_GZCHAMBER){
-			sb.drawwepdot(-23,-17,(3,1.5));
-			sb.drawwepdot(-24,-17,(1,8));
-			sb.drawwepdot(-23,-20,(3,4));
-		}
-		sb.drawimage("ROQPA0",(-73,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(0.6,0.6));
+		if(sb.hudlevel == 1){
+			// Draw Extra Rocquettes
+			sb.drawimage("ROQPA0",(-73,-4),sb.DI_SCREEN_CENTER_BOTTOM,scale:(0.6,0.6));
 			sb.drawnum(hpl.countinv("HDRocketAmmo"),-73,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+		}
 	}
+
+	override void DrawChamberedRounds(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
+
+		// Draw Chambered Shell
+		if(hdw.weaponstatus[ASHTS_CHAMBER]==3){
+			sb.drawrect(-30-3,-25-5,3,5);
+			sb.drawrect(-30-3,-22-2,3,2);
+		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==2){
+			sb.drawrect(-30-3,-25-2,3,2);
+			sb.drawrect(-30-3,-22-2,3,2);
+		}else if(hdw.weaponstatus[ASHTS_CHAMBER]==1){
+			sb.drawrect(-30-3,-22-2,3,2);
+		}
+
+		// Draw Chambered Rocquette
+		if(hdw.weaponstatus[0]&ASHTF_GZCHAMBER){
+			sb.drawrect(-23-3,-22-1.5,3,1.5);
+			sb.drawrect(-24-1,-22-8,1,8);
+			sb.drawrect(-23-3,-25-4,3,4);
+		}
+	}
+
 	override string gethelptext(){
 		return
 		WEPHELP_FIRESHOOT
@@ -230,44 +111,12 @@ class RIReaperGL:RIReaper{
 		HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl,
 		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc,string whichdot
 	){
-	if(hdw.weaponstatus[0]&ASHTF_GLMODE)sb.drawgrenadeladder(hdw.airburst,bob);
-		else if(weaponstatus[ASHTS_SIGHTS]==0){
-			int cx,cy,cw,ch;
-			[cx,cy,cw,ch]=screen.GetClipRect();
-			sb.SetClipRect(
-				-16+bob.x,-4+bob.y,32,16,
-				sb.DI_SCREEN_CENTER
-			);
-			vector2 bobb=bob*3;
-			bobb.y=clamp(bobb.y,-8,8);
-				sb.drawimage(
-				"RPRFRNT",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-				alpha:0.9
-			);
-				sb.SetClipRect(cx,cy,cw,ch);
-				sb.drawimage(
-				"TmpSBCK",(0,-11)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
-			);
-		}else{
-			int cx,cy,cw,ch;
-			[cx,cy,cw,ch]=screen.GetClipRect();
-			sb.SetClipRect(
-				-16+bob.x,-4+bob.y,32,16,
-				sb.DI_SCREEN_CENTER
-			);
-			vector2 bobb=bob*3;
-			bobb.y=clamp(bobb.y,-8,8);
-				sb.drawimage(
-				"RPRFGRN",(0,-11)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-				alpha:0.9
-			);
-				sb.SetClipRect(cx,cy,cw,ch);
-				sb.drawimage(
-				"RPRSBCK",(0,-11)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
-			);
+		if(hdw.weaponstatus[0]&ASHTF_GLMODE){
+			sb.drawgrenadeladder(hdw.airburst,bob);
+		}else {
+			super.DrawSightPicture(sb, hdw, hpl, sightbob, bob, fov, scopeview, hpc, whichdot);
 		}
 	}
-
 	states{
 	select0:
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE,"select0rigren");
@@ -276,12 +125,6 @@ class RIReaperGL:RIReaper{
 	deselect0:
 		#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE,"deselect0rigren");
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		goto deselect0big;
-	select0rigren:
-		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-		goto select0big;
-	deselect0rigren:
-		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		goto deselect0big;
 	ready:
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
@@ -321,14 +164,17 @@ class RIReaperGL:RIReaper{
 		ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 		#### # 0{
 			invoker.weaponstatus[ASHTS_FLAGS]|=ASHTF_JUSTUNLOAD;
-			if(invoker.weaponstatus[0]&ASHTF_GLMODE){setweaponstate("unloadgrenade");
+			if(invoker.weaponstatus[0]&ASHTF_GLMODE){
+				setweaponstate("unloadgrenade");
 			}else if(invoker.weaponstatus[ASHTS_MAG]>=0){
 				if(invoker.weaponstatus[ASHTS_BOXER]>0){
 				setweaponstate("boxout");
 				}else{
 				setweaponstate("unmag");
 				}
-			}else if(invoker.weaponstatus[ASHTS_CHAMBER]>0){setweaponstate("prechamber");}
+			}else if(invoker.weaponstatus[ASHTS_CHAMBER]>0){
+				setweaponstate("prechamber");
+			}
 		}goto nope;
 	nadeflash:
 		ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();		
@@ -365,11 +211,6 @@ class RIReaperGL:RIReaper{
 			A_SetHelpText();
 		}goto nope;
 	
-	althold:
-		---- A 1;
-		---- A 0 A_Refire();
-		goto ready;
-
 	altreload:
 		#### # 0{
 			invoker.weaponstatus[ASHTS_FLAGS]&=~ASHTF_JUSTUNLOAD;
@@ -441,32 +282,7 @@ class RIReaperGL:RIReaper{
 		}
 	}
 	override void InitializeWepStats(bool idfa){
+		super.InitializeWepStats(idfa);
 		weaponstatus[ASHTS_FLAGS]|=ASHTF_GZCHAMBER;
-		weaponstatus[ASHTS_MAG]=20;
-		weaponstatus[ASHTS_CHAMBER]=3;
-		weaponstatus[ASHTS_BOXER]=0;
-		weaponstatus[ASHTS_BOXEE]=0;
-		if(!idfa)weaponstatus[ASHTS_AUTO]=0;
 	}
 }
-	
-//		ASHTF_JUSTUNLOAD 1
-//	ASHTF_GLMODE=2,
-//	ASHTF_ZCHAMBER=4,
-//	ASHTF_CHAMBERBROKEN=8,
-//	ASHTF_DIRTYMAG=16,
-//	ASHTF_STILLPRESSINGRELOAD=32,
-//	ASHTF_LOADINGDIRTY=64,
-
-//		ASHTS_FLAGS 0
-//		ASHTS_MAG 1 //-1 unmagged
-//		ASHTS_CHAMBER 2 //0 empty, 1 spent, 2 animate, 3 loaded
-//		ASHTS_AUTO 3 //0 semi, 1 burst, 2 auto
-//		ASHTS_CHOKE 4
-//	ASHTS_HEAT=5
-//	ASHTS_ZMAG=6
-//	ASHTS_ZAUTO=7
-//	ASHTS_BOXER=8
-//	ASHTS_BOXEE=9
-//	ASHTS_SIGHTS=10
-
