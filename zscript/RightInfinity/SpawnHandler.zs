@@ -159,8 +159,6 @@ class RRRRWeaponsHandler : EventHandler {
         if (!brontobuddy_allowBackpacks)     backpackBlacklist.push((Class<Inventory>)('RIBrontoBuddy'));
         if (!khleb_allowBackpacks)           backpackBlacklist.push((Class<Inventory>)('RIKhleb'));
         if (!reaper_allowBackpacks)          backpackBlacklist.push((Class<Inventory>)('RIReaper'));
-        if (!reaper_allowBackpacks)          backpackBlacklist.push((Class<Inventory>)('RIReaperGL'));
-        if (!reaper_allowBackpacks)          backpackBlacklist.push((Class<Inventory>)('RIReaperZM'));
         if (!thompson_allowBackpacks)        backpackBlacklist.push((Class<Inventory>)('RIThompson'));
 
         if (!reapermag_allowBackpacks)       backpackBlacklist.push((Class<Inventory>)('RIReapM8'));
@@ -175,23 +173,21 @@ class RRRRWeaponsHandler : EventHandler {
         // 12 gauge Buckshot Ammo.
         Array<string> wep_12gaShell;
         wep_12gaShell.push('RIReaper');
-        wep_12gaShell.push('RIReaperGL');
-        wep_12gaShell.push('RIReaperZM');
         addAmmo('HDShellAmmo', wep_12gaShell);
 
         // 4mm
         Array<string> wep_4mm;
-        wep_4mm.push('RIReaperZM');
+        wep_4mm.push('RIReaper');
         addAmmo('FourMilAmmo', wep_4mm);
 
         // 4mm Magazines
         Array<string> wep_4mmMag;
-        wep_4mmMag.push('RIReaperZM');
+        wep_4mmMag.push('RIReaper');
         addAmmo('HD4mMag', wep_4mmMag);
 
         // Rocket (Gyro) Grenades.
         Array<string> wep_rocket;
-        wep_rocket.push('RIReaperGL');
+        wep_rocket.push('RIReaper');
         addAmmo('HDRocketAmmo', wep_rocket);
 
         // Brontornis Rounds

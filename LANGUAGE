@@ -3,8 +3,6 @@
 TAG_BRONTOBUDDY                        = "Brontornis Cannon W/Bolt Rack";
 TAG_KHLEB                              = "Khleb";
 TAG_REAPER                             = "Reaper Automatic Shotgun";
-TAG_REAPER_GL                          = "Reaper Automatic Shotgun W/ Grenade Launcher";
-TAG_REAPER_ZM                          = "Reaper Automatic Shotgun W/ Underbarrel Carbine";
 TAG_THOMPSON                           = "Thompson Submachine Gun (9mm Repro)";
 
 TAG_REAPER_MAG                         = "Reaper Magazine";
@@ -14,8 +12,8 @@ TAG_THOMPSON_DRUMMAG                   = "Thompson Drum";
 PICKUP_BRONTOBUDDY                     = "You got the Brontornis! It's got a neat bolt rack!";
 PICKUP_KHLEB                           = "It's Khleb-bering time!";
 PICKUP_REAPER                          = "You got the Reaper Automatic Shotgun!";
-PICKUP_REAPER_GL                       = "You got the Reaper Automatic Shotgun!";
-PICKUP_REAPER_ZM                       = "You got the Reaper Automatic Shotgun!";
+PICKUP_REAPER_GL                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Grenade Launcher!";
+PICKUP_REAPER_ZM                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Carbine!";
 PICKUP_THOMPSON                        = "You got the Thompson SMG! Rata-tat-tat!";
 
 PICKUP_REAPER_MAG                      = "Picked up a 12 Gauge Magazine.";
@@ -24,8 +22,6 @@ PICKUP_THOMPSON_DRUMMAG                = "Picked up a 9mm Drum magazine.";
 
 OB_KHLEB                               = "%k pyhiscally removed a chunk of %o and threw that s#&! on the floor";
 OB_REAPER                              = "%k called a %o harvest.";
-OB_REAPER_GL                           = "%k called a %o harvest.";
-OB_REAPER_ZM                           = "%k called a %o harvest.";
 OB_THOMPSON                            = "%o found out what was in %k's violin case.";
 
 // Menu Labels
