@@ -148,15 +148,13 @@ class RIReapD20:HD9mMag15{
 		inventory.pickupmessage "$PICKUP_REAPER_DRUMMAG";
 		hdpickup.refid RILD_ASTDRM;
 	}
+
 	override void GetItemsThatUseThis(){
 		itemsthatusethis.push("RIReaper");
 		itemsthatusethis.push("RIReaperGL");
 		itemsthatusethis.push("RIReaperZM");
 	}
-	//	override string,string,name,double getmagsprite(int thismagamt){
-	//	string magsprite=(thismagamt>0)?"ASDMB0":"ASDMA0";
-	//	return magsprite,"SHELA0","HDShellAmmo",2.;
-	//	}
+
 	override bool Extract(){
 		SyncAmount();
 		int mindex=mags.size()-1;
@@ -185,6 +183,7 @@ class RIReapD20:HD9mMag15{
 		}
 		return true;
 	}
+
 	override bool Insert(){
 		SyncAmount();
 		int mindex=mags.size()-1;
@@ -212,7 +211,8 @@ class RIReapD20:HD9mMag15{
 		}
 		return true;
 	}
-		override string,string,name,double getmagsprite(int thismagamt){
+
+	override string,string,name,double getmagsprite(int thismagamt){
 		string magsprite;
 		if(thismagamt==0)magsprite="RPRDA0";
 		else if(thismagamt==1)magsprite="RPRDB0";
@@ -238,6 +238,7 @@ class RIReapD20:HD9mMag15{
 		else magsprite="RPRDA0";
 		return magsprite,"SHL1A0","HDShellAmmo",.60;
 	}
+
 	states{
 	cacheSprites:
 		RPRD A 0;
@@ -257,28 +258,6 @@ class RIReapD20EmptyMag:IdleDummy{
 		super.postbeginplay();
 		HDMagAmmo.SpawnMag(self,"RIReapD20",0);
 		destroy();
-	}
-}
-
-class RISpentShell:Actor{
-	default{
-		+missile +doombounce +bounceonactors +cannotpush -noteleport +forcexybillboard
-		seesound "misc/casing2";scale 0.3;height 2;radius 2;
-		bouncefactor 0.5;
-	}
-	override void postbeginplay(){
-		super.postbeginplay();
-		A_ChangeVelocity(frandom(-2,2),frandom(-8,-10),frandom(-2,2),CVF_RELATIVE);
-	}
-	states{
-	spawn:
-		ESHL ABCDEFGH 2;
-		loop;
-	death:
-		ESHL A -1{
-			bmissile=false;
-			frame=randompick(0,0,0,0,4,4,4,4,2,2,5);
-		}stop;
 	}
 }
 
@@ -303,10 +282,7 @@ class RIReapM8:HD9mMag15{
 		itemsthatusethis.push("RIReaperGL");
 		itemsthatusethis.push("RIReaperZM");
 	}
-	//	override string,string,name,double getmagsprite(int thismagamt){
-	//	string magsprite=(thismagamt>0)?"ASDMB0":"ASDMA0";
-	//	return magsprite,"SHELA0","HDShellAmmo",2.;
-	//	}
+
 	override bool Extract(){
 		SyncAmount();
 		int mindex=mags.size()-1;
@@ -318,7 +294,6 @@ class RIReapM8:HD9mMag15{
 		HDF.Give(owner,roundtype,1);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]--;
-//		extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
 		if(mags[mindex]>=7){
 			extracttime=9;
 		}else if(mags[mindex]>=5){
@@ -333,6 +308,7 @@ class RIReapM8:HD9mMag15{
 		}
 		return true;
 	}
+
 	override bool Insert(){
 		SyncAmount();
 		int mindex=mags.size()-1;
@@ -344,7 +320,6 @@ class RIReapM8:HD9mMag15{
 		owner.A_TakeInventory(roundtype,1,TIF_NOTAKEINFINITE);
 		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
 		mags[mags.size()-1]++;
-//		inserttime=6+(mags[mindex]*0.1);
 		if(mags[mindex]>=7){
 			inserttime=9;
 		}else if(mags[mindex]>=5){
@@ -356,12 +331,14 @@ class RIReapM8:HD9mMag15{
 		}
 		return true;
 	}
-		override string,string,name,double getmagsprite(int thismagamt){
+
+	override string,string,name,double getmagsprite(int thismagamt){
 		string magsprite;
 		if(thismagamt==0)magsprite="ASSMA0";
 		else magsprite="ASSMB0";
-		return magsprite,"SHELA0","HDShellAmmo",.60;
+		return magsprite,"SHL1A0","HDShellAmmo",.60;
 	}
+
 	states{
 	spawn:
 		ASSM B -1;
