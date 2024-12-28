@@ -30,11 +30,12 @@ class RIReaper:HDWeapon{
 
 		hdweapon.refid RILD_REAP;
 		hdweapon.loadoutcodes "
+			\cumag - 0/1, drum/box mag
 			\cufiremode - 0-2, semi/burst/auto
 			\cuchoke - 0-7, 0 skeet, 7 full
-			\cusight - Sight Type
-			\cugl - Underbarrel Grenade Launcher
-			\cuzm - Underbarrel ZM66";
+			\cusight - alternate sights
+			\cugl - underbarrel grenade launcher
+			\cuzm - underbarrel carbine";
 	}
 
 	override void tick() {
@@ -96,6 +97,8 @@ class RIReaper:HDWeapon{
 		if (choke>=0)weaponstatus[ASHTS_CHOKE]=choke;
 		int sight=min(getloadoutvar(input,"sight",0),1);
 		if (sight>=0)weaponstatus[ASHTS_SIGHTS]=sight;
+		int mag=min(getloadoutvar(input,"mag",1),1);
+		if (mag>=0)weaponstatus[ASHTS_BOXER]=mag;
 
 		if (getloadoutvar(input,"gl",1)>0)weaponstatus[ASHTS_UNDERBARREL]=1;
 		else if (getloadoutvar(input,"zm",1)>0)weaponstatus[ASHTS_UNDERBARREL]=2;
@@ -155,10 +158,15 @@ class RIReaper:HDWeapon{
 
 	override void DropOneAmmo(int amt) {
 		if (owner) {
-			amt=clamp(amt,1,10);
-			if (owner.countinv("HDShellAmmo"))owner.A_DropInventory("HDShellAmmo",amt*20);
-			else if (weaponstatus[ASHTS_BOXER]==1)owner.A_DropInventory("RIReapM8",amt);
-			else owner.A_DropInventory("RIReapD20",amt);
+			amt = clamp(amt, 1, 10);
+
+			if (owner.countinv("HDShellAmmo")) {
+				owner.A_DropInventory("HDShellAmmo", amt * 20);
+			} else if (weaponstatus[ASHTS_BOXER]==1) {
+				owner.A_DropInventory("RIReapM8", amt);
+			} else {
+				owner.A_DropInventory("RIReapD20", amt);
+			}
 		}
 	}
 
@@ -204,33 +212,35 @@ class RIReaper:HDWeapon{
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl) {
 		if (sb.hudlevel == 1) {
 
+			let boxMagNext = (hdw.weaponstatus[ASHTS_BOXER] ^ hdw.weaponstatus[ASHTS_BOXEE])&1;
+
 			// Draw Extra Drum Mags
 			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapD20")));
 			if (nextdrumloaded>=20) {
-				sb.drawimage("ASDMB0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				sb.drawimage("ASDMB0",(boxMagNext ? -61 : -51,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
 			} else if (nextdrumloaded<1) {
-				sb.drawimage("ASDMA0",(-51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
+				sb.drawimage("ASDMA0",(boxMagNext ? -61 : -51,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1,1));
 			} else sb.drawbar(
 				"ASDMNORM","ASDMGREY",
 				nextdrumloaded,20,
-				(-51,-3),-1,
+				(boxMagNext ? -61 : -51,-3),-1,
 				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 			);
-			sb.drawnum(hpl.countinv("RIReapD20"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+			sb.drawnum(hpl.countinv("RIReapD20"),boxMagNext ? -58 : -43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
 			// Draw Extra Box Mags
 			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RIReapM8")));
 			if (nextmagloaded>=8) {
-				sb.drawimage("ASSMB0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
+				sb.drawimage("ASSMB0",(boxMagNext ? -51 : -61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1,1));
 			} else if (nextmagloaded<1) {
-				sb.drawimage("ASSMA0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
+				sb.drawimage("ASSMA0",(boxMagNext ? -51 : -61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(1,1));
 			} else sb.drawbar(
 				"ASSMNORM","ASSMGREY",
 				nextmagloaded,20,
-				(-61,-3),-1,
+				(boxMagNext ? -51 : -61,-3),-1,
 				sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 			);
-			sb.drawnum(hpl.countinv("RIReapM8"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+			sb.drawnum(hpl.countinv("RIReapM8"),boxMagNext ? -43 : -58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 
 			// Draw Underbarrel Ammo
 			switch (weaponstatus[ASHTS_UNDERBARREL]) {
@@ -291,7 +301,7 @@ class RIReaper:HDWeapon{
 						double RIy=(RIrad-0)*sin((18*i)-95);
 						sb.drawrect(-27-(-RIx*1)-2,-23-(-RIy*1)-2,2,2);
 					}
-				} else{
+				} else {
 					for (int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--) {
 						double RIrad=13; //circle radius
 						double RIx=(RIrad-0)*cos((18*i)-90);
@@ -301,7 +311,7 @@ class RIReaper:HDWeapon{
 				}
 
 			// Draw Box Mag Status
-			} else{
+			} else {
 
 				// Draw Box Mag
 				if (hdw.weaponstatus[ASHTS_CHAMBER]==2) {
@@ -312,7 +322,7 @@ class RIReaper:HDWeapon{
 						sb.drawrect((-48-(-RIx*1))-2, (53-(-RIy*1))-2, 2, 2);
 						sb.drawrect((-51-(-RIx*1))-4, (53-(-RIy*1))-2, 4, 2);
 					}
-				} else{
+				} else {
 					for (int i=hdw.weaponstatus[ASHTS_MAG];i>0;i--) {
 						double RIrad=37; //circle radius
 						double RIx=(RIrad-0)*cos((3*i)-0);
@@ -447,7 +457,7 @@ class RIReaper:HDWeapon{
 			sb.drawimage(
 				"RPRZBCK",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
 			);
-		} else{
+		} else {
 			int cx,cy,cw,ch;
 			[cx,cy,cw,ch]=screen.GetClipRect();
 			sb.SetClipRect(
@@ -488,7 +498,7 @@ class RIReaper:HDWeapon{
 				sb.drawimage(
 				"TmpSBCK",(0,-11)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
 			);
-		} else{
+		} else {
 			int cx,cy,cw,ch;
 			[cx,cy,cw,ch]=screen.GetClipRect();
 			sb.SetClipRect(
@@ -578,9 +588,8 @@ class RIReaper:HDWeapon{
 
 		user3:
 			#### # 3;
-			#### # 0 A_JumpIf(PressingReload(),"reloadselect");
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2 && invoker.weaponstatus[0]&ASHTF_GLMODE, "zmmagman");
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_BOXER],"boxmagman");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_BOXER], "boxmagman");
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 0 A_MagManager("RIReapD20");
 			goto ready;
@@ -595,24 +604,30 @@ class RIReaper:HDWeapon{
 
 		user2:
 		firemode:
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1 && invoker.weaponstatus[0]&ASHTF_GLMODE,"abadjust");
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2 && invoker.weaponstatus[0]&ASHTF_GLMODE,"zmfiremode");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1 && invoker.weaponstatus[0]&ASHTF_GLMODE, "abadjust");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2 && invoker.weaponstatus[0]&ASHTF_GLMODE, "zmfiremode");
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 3;
-			#### # 0 A_JumpIf(PressingReload(),"reloadselect");
-			#### # 1{
-				int aut=invoker.weaponstatus[ASHTS_AUTO];
-				if (aut>=0) {
-					invoker.weaponstatus[ASHTS_AUTO]=aut==0?1:0;
+			#### # 0 A_JumpIf(PressingReload(), "reloadselect");
+			#### # 1 {
+				int aut = invoker.weaponstatus[ASHTS_AUTO];
+				if (aut >= 0) {
+					invoker.weaponstatus[ASHTS_AUTO] = aut == 0 ? 1 : 0;
 				}
-			}goto nope;
+			}
+			goto nope;
 		zmfiremode:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0;
-			#### # 1{if (invoker.weaponstatus[ASHTS_ZAUTO]>=2)invoker.weaponstatus[ASHTS_ZAUTO]=0;
-				else invoker.weaponstatus[ASHTS_ZAUTO]++;
+			#### # 1 {
+				if (invoker.weaponstatus[ASHTS_ZAUTO]>=2) {
+					invoker.weaponstatus[ASHTS_ZAUTO] = 0;
+				} else {
+					invoker.weaponstatus[ASHTS_ZAUTO]++;
+				}
+
 				A_WeaponReady(WRF_NONE);
-			}goto nope;
+			}
+			goto nope;
 
 		fire:
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1 && invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GLMODE,"firefrag");
@@ -622,15 +637,15 @@ class RIReaper:HDWeapon{
 			#### JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 3;
 			#### # 1{
-				if (invoker.weaponstatus[ASHTS_CHAMBER]==3) {
+				if (invoker.weaponstatus[ASHTS_CHAMBER] == 3) {
 					A_FireReaper();
-				} else{
+				} else {
 					setweaponstate("nope");
 				}
 			}
 			#### # 1 offset(0,40);
 			#### # 0 {
-				invoker.weaponstatus[ASHTS_CHAMBER]=1;
+				invoker.weaponstatus[ASHTS_CHAMBER] = 1;
 			}
 			#### # 0 {
 				if (invoker.shotpower>0.901&&invoker.weaponstatus[ASHTS_BOXER]>0) {
@@ -646,7 +661,7 @@ class RIReaper:HDWeapon{
 			goto ready;
 		firefrag:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER,1);
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER, 1);
 			goto nope; //Note to tell Matt that the ZM's GL causes a flash even when unloaded
 			#### # 2;
 			#### # 1 A_Gunflash("nadeflash");
@@ -654,30 +669,34 @@ class RIReaper:HDWeapon{
 			goto nope;
 		fireZM:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
+			#### # 0 A_JumpIf(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN, "nope");
 			#### # 2 {
-			if (invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN) {
-					setweaponstate("nope");
+				if (invoker.weaponstatus[ZM66S_AUTO]) {
+					A_SetTics(3);
 				}
-				if (invoker.weaponstatus[ZM66S_AUTO])A_SetTics(3);
 			}
 			goto shootgun;
 
 		hold:
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2 && invoker.weaponstatus[0]&ASHTF_GLMODE, 2);
-			#### # 0{
+			#### # 0 {
 				if (
-					//full auto
-					invoker.weaponstatus[ASHTS_AUTO]==2
-				)setweaponstate("fire2");
-				else if (
-					//burst
-					invoker.weaponstatus[ASHTS_AUTO]<1
-				)setweaponstate("nope");
-			}goto fire;
+					// full auto
+					invoker.weaponstatus[ASHTS_AUTO] == 2
+				) {
+					setweaponstate("fire2");
+				} else if (
+					// burst
+					invoker.weaponstatus[ASHTS_AUTO] < 1
+				) {
+					setweaponstate("nope");
+				}
+			}
+			goto fire;
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO]>4,"nope");
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO],"shootgun");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO] > 4, "nope");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZAUTO], "shootgun");
 			goto nope;
 
 
@@ -763,16 +782,25 @@ class RIReaper:HDWeapon{
 		// TODO: Determine if still used
 		unloadchamber:
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 4 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER]<1,"nope");
-			#### # 10{
-				class<actor>which=invoker.weaponstatus[ASHTS_CHAMBER]>1?"HDShellAmmo":"RISpentShell";
-				invoker.weaponstatus[ASHTS_CHAMBER]=0;
-				A_SpawnItemEx(which,
-					cos(pitch)*10,0,height-8-sin(pitch)*10,
-					vel.x,vel.y,vel.z,
-					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+			#### # 4 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] < 1, "nope");
+			#### # 10 {
+				class<actor> which = invoker.weaponstatus[ASHTS_CHAMBER] > 1
+					? "HDFumblingShell"
+					: "RISpentShell";
+
+				invoker.weaponstatus[ASHTS_CHAMBER] = 0;
+
+				A_SpawnItemEx(
+					which,
+					cos(pitch) * 10, 0, height - 8 - sin(pitch) * 10,
+					vel.x, vel.y, vel.z,
+					0,
+					SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 				);
-			}goto readyend;
+			}
+			goto readyend;
+
+
 		loadchamber:
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER]>0,"nope");
@@ -813,7 +841,8 @@ class RIReaper:HDWeapon{
 				} else if (invoker.weaponstatus[ASHTS_CHAMBER]>0) {
 					setweaponstate("prechamber");
 				}
-			}goto nope;
+			}
+			goto nope;
 
 
 		altfire:
@@ -821,15 +850,16 @@ class RIReaper:HDWeapon{
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1, "altfiregl");
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2, "altfirezm");
 			#### # 0 A_WeaponBusy();
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER]<3&&invoker.weaponstatus[ASHTS_MAG]>0,"prechamber");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] < 3 && invoker.weaponstatus[ASHTS_MAG] > 0, "prechamber");
 			#### # 0 {
 				invoker.weaponstatus[0]&=~ASHTF_JUSTUNLOAD;
-				if (invoker.weaponstatus[ASHTS_MAG]>=20&&invoker.weaponstatus[ASHTS_CHAMBER]==3) {
-					setweaponstate("nope");
-				} else if (HDMagAmmo.NothingLoaded(self,"RIReapD20")||HDMagAmmo.NothingLoaded(self,"RIReapM8")) {
+			}
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_MAG] >= 20 && invoker.weaponstatus[ASHTS_CHAMBER] == 3, "nope");
+			#### # 0 {
+				if (HDMagAmmo.NothingLoaded(self, "RIReapD20") || HDMagAmmo.NothingLoaded(self, "RIReapM8")) {
 					if (
-						invoker.weaponstatus[ASHTS_MAG]<0
-						&&countinv("HDShellAmmo")
+						invoker.weaponstatus[ASHTS_MAG] < 0
+						&& countinv("HDShellAmmo")
 					) {
 						setweaponstate("loadchamber");
 					} else {
@@ -838,66 +868,70 @@ class RIReaper:HDWeapon{
 				}
 			}
 		althold:
-			---- A 1;
-			---- A 0 A_Refire();
+			#### # 1;
+			#### # 0 A_Refire();
 			goto ready;
 
 		altfiregl:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 1 offset(6,0) {
-				invoker.weaponstatus[0]^=ASHTF_GLMODE;
-				invoker.airburst=0;
+				invoker.weaponstatus[0] ^= ASHTF_GLMODE;
+				invoker.airburst = 0;
 				A_SetCrosshair(21);
 				A_SetHelpText();
-			}goto nope;
+			}
+			goto nope;
 		altfirezm:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 1 offset(6,0) {
-				invoker.weaponstatus[0]^=ASHTF_GLMODE;
+				invoker.weaponstatus[0] ^= ASHTF_GLMODE;
 				A_SetCrosshair(21);
 				A_StartSound("weapons/pocket",CHAN_WEAPON);
 				A_SetHelpText();
-			}goto nope;
+			}
+			goto nope;
 
 		reload:
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0 {
-				if (invoker.weaponstatus[ASHTS_CHAMBER]<3&&invoker.weaponstatus[ASHTS_MAG]>0) {
-					setweaponstate("prechamber");
-				}
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER]<3&&invoker.weaponstatus[ASHTS_MAG] > 0, "prechamber");
+			#### # 3 {
+				invoker.weaponstatus[ASHTS_BOXEE] = PressingFiremode();
 			}
-			#### # 3;
+			#### # 0 A_JumpIf(PressingFiremode(), "reloadselect");
 			#### # 0 {
-				if (PressingFiremode()) {
-					setweaponstate("reloadselect");
+				invoker.weaponstatus[0] &= ~ASHTF_JUSTUNLOAD;
+
+				if (invoker.weaponstatus[ASHTS_BOXER]) {
+					if (invoker.weaponstatus[ASHTS_MAG] >= 8) {
+						setweaponstate("nope");
+					}
+				} else {
+					if (invoker.weaponstatus[ASHTS_MAG] >= 20) {
+						setweaponstate("nope");
+					}
 				}
-			}
-			#### # 0 {
-				invoker.weaponstatus[0]&=~ASHTF_JUSTUNLOAD;
-				if (invoker.weaponstatus[ASHTS_BOXER]>0) {
-					if (invoker.weaponstatus[ASHTS_MAG]>=8)setweaponstate("nope");
-				} else{
-					if (invoker.weaponstatus[ASHTS_MAG]>=20)setweaponstate("nope");
-				}
+
 				if (HDMagAmmo.NothingLoaded(self,"RIReapD20")) {
 					if (HDMagAmmo.NothingLoaded(self,"RIReapM8")) {
 						setweaponstate("nope");
-					} else{
-						invoker.weaponstatus[ASHTS_BOXEE]=1;
+					} else {
+						invoker.weaponstatus[ASHTS_BOXEE] = 1;
 						setweaponstate("reloadselect");
 					}
 				} else if (HDMagAmmo.NothingLoaded(self,"RIReapM8")) {
 					if (HDMagAmmo.NothingLoaded(self,"RIReapD20")) {
 						setweaponstate("nope");
-					} else{
-						invoker.weaponstatus[ASHTS_BOXEE]=2;
+					} else {
+						invoker.weaponstatus[ASHTS_BOXEE] = 1;
 						setweaponstate("reloadselect");
 					}
 				}
-			}goto reloadselect;
+			}
 		reloadselect:
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_BOXER]==1,"boxout");
-			goto unmag;
+			#### # 0 {
+				invoker.weaponstatus[ASHTS_BOXEE] = invoker.weaponstatus[ASHTS_BOXEE]|PressingFiremode();
+			}
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_BOXER],"boxout");
 		unmag:
 			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 1 offset(0,24) A_SetCrosshair(21);
@@ -907,29 +941,29 @@ class RIReaper:HDWeapon{
 			ASTC JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 5 offset(6,36);
 			ASTD JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 5 offset(8,42) {
-				A_MuzzleClimb(0.3,0.4);
-			}
+			#### # 5 offset(8,42) A_MuzzleClimb(0.3,0.4);
 			ASTE JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 5 offset(8,42);
 			ASTZ A 0 offset(8,42) A_StartSound("weapons/smgmagmove",CHAN_WEAPON);
 			#### # 5 offset(8,42);
 			#### # 0{
-				int magamt=invoker.weaponstatus[ASHTS_MAG];
-				if (magamt<0) {
+				int magamt = invoker.weaponstatus[ASHTS_MAG];
+				if (magamt < 0) {
 					setweaponstate("magout");
 					return;
 				}
-				invoker.weaponstatus[ASHTS_MAG]=-1;
+
+				invoker.weaponstatus[ASHTS_MAG] = -1;
+
 				if (
-					(!PressingUnload()&&!PressingReload())
-					||A_JumpIfInventory("RIReapD20",0,"null")
+					!(PressingUnload() || PressingReload())
+					|| A_JumpIfInventory("RIReapD20", 0, "null")
 				) {
-					HDMagAmmo.SpawnMag(self,"RIReapD20",magamt);
+					HDMagAmmo.SpawnMag(self, "RIReapD20", magamt);
 					setweaponstate("magout");
-				} else{
-					HDMagAmmo.GiveMag(self,"RIReapD20",magamt);
-					A_StartSound("weapons/pocket",CHAN_WEAPON);
+				} else {
+					HDMagAmmo.GiveMag(self, "RIReapD20", magamt);
+					A_StartSound("weapons/pocket", CHAN_WEAPON);
 					setweaponstate("pocketmag");
 				}
 			}
@@ -942,28 +976,27 @@ class RIReaper:HDWeapon{
 			ASTC JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 4 offset(6,36);
 			ASTD JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 4 offset(8,42) {
-				A_MuzzleClimb(0.3,0.4);
-			}
+			#### # 4 offset(8,42) A_MuzzleClimb(0.3,0.4);
 			ASTE JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 4 offset(8,42);
 			ASTZ A 0 offset(8,42) A_StartSound("weapons/smgmagmove",CHAN_WEAPON);
 			#### # 4 offset(8,42);
-
 			#### # 0{
-				int magamt=invoker.weaponstatus[ASHTS_MAG];
-				if (magamt<0) {
+				int magamt = invoker.weaponstatus[ASHTS_MAG];
+				if (magamt < 0) {
 					setweaponstate("magout");
 					return;
 				}
-				invoker.weaponstatus[ASHTS_MAG]=-1;
+
+				invoker.weaponstatus[ASHTS_MAG] = -1;
+
 				if (
-					(!PressingUnload()&&!PressingReload())
+					!(PressingUnload() || PressingReload())
 					||A_JumpIfInventory("RIReapM8",0,"null")
 				) {
 					HDMagAmmo.SpawnMag(self,"RIReapM8",magamt);
 					setweaponstate("magout");
-				} else{
+				} else {
 					HDMagAmmo.GiveMag(self,"RIReapM8",magamt);
 					A_StartSound("weapons/pocket",CHAN_WEAPON);
 					setweaponstate("pocketmag");
@@ -971,70 +1004,55 @@ class RIReaper:HDWeapon{
 			}
 		pocketmag:
 			ASTZ A 2 offset(8,42);
-			#### # 7 offset(8,42) A_StartSound("weapons/pocket",CHAN_WEAPON);
-			#### # 7 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
-			#### # 7 offset(8,42) A_StartSound("weapons/pocket",CHAN_WEAPON);
-			#### # 7 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
+			#### # 7 offset(8,42) A_StartSound("weapons/pocket", CHAN_WEAPON);
+			#### # 7 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8), frandom(-0.2,0.4));
+			#### # 7 offset(8,42) A_StartSound("weapons/pocket", CHAN_WEAPON);
+			#### # 7 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8), frandom(-0.2,0.4));
 		magout:
-			#### # 0{
-				if (invoker.weaponstatus[ASHTS_BOXEE]==2) {
-					invoker.weaponstatus[ASHTS_BOXER]=0;
-					setweaponstate("rimagloader");
-				} else if (invoker.weaponstatus[ASHTS_BOXEE]==1) {
-					invoker.weaponstatus[ASHTS_BOXER]=1;
-					setweaponstate("rimagloader");
-				}
-			}
-			#### # 0{
-					if (PressingFiremode()&&invoker.weaponstatus[ASHTS_BOXER]<1) {invoker.weaponstatus[ASHTS_BOXER]=1;
-						} else if (PressingFiremode()&&invoker.weaponstatus[ASHTS_BOXER]>0) {invoker.weaponstatus[ASHTS_BOXER]=0;
-					}
-			}
-		rimagloader:
-			#### # 0{
-				if (invoker.weaponstatus[0]&ASHTF_JUSTUNLOAD)setweaponstate("reloadend");
-				else if (invoker.weaponstatus[ASHTS_BOXER]==1)setweaponstate("loadboxmag");
-				else setweaponstate("loadmag");
-			}
+			#### # 0 A_JumpIf(invoker.weaponstatus[0]&ASHTF_JUSTUNLOAD, "reloadend");
+			#### # 0 A_JumpIf((invoker.weaponstatus[ASHTS_BOXER] ^ invoker.weaponstatus[ASHTS_BOXEE])&1, "loadboxmag");
+			goto loadmag;
 
 		loadmag:
 			#### # 0 A_StartSound("weapons/pocket",CHAN_WEAPON);
 			ASTZ A 10 offset(8,42);
-			#### # 0{
-				invoker.weaponstatus[ASHTS_BOXER]=0;
-				invoker.weaponstatus[ASHTS_BOXEE]=0;
-				let mmm=hdmagammo(findinventory("RIReapD20"));
+			#### # 0 {
+				let mmm = hdmagammo(findinventory("RIReapD20"));
 				if (mmm) {
-					invoker.weaponstatus[ASHTS_MAG]=mmm.TakeMag(true);
-					A_StartSound("weapons/smgmagclick",CHAN_BODY);
+					invoker.weaponstatus[ASHTS_BOXER] = 0;
+					invoker.weaponstatus[ASHTS_BOXEE] = 0;
+					
+					invoker.weaponstatus[ASHTS_MAG] = mmm.TakeMag(true);
+					A_StartSound("weapons/smgmagclick", CHAN_BODY);
 				}
 			}
 			ASTE JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 6 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
 			ASTD JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 6 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
-			#### # 0 A_StartSound("weapons/rprdrmin",CHAN_BODY);
+			#### # 0 A_StartSound("weapons/rprdrmin", CHAN_BODY);
 			ASTC JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 6 offset(6,36);
 			goto reloadend;
 
 		loadboxmag:
-			#### # 0 A_StartSound("weapons/pocket",CHAN_WEAPON);
+			#### # 0 A_StartSound("weapons/pocket", CHAN_WEAPON);
 			ASTZ A 5 offset(8,42);
-			#### # 0{
-				invoker.weaponstatus[ASHTS_BOXER]=1;
-				invoker.weaponstatus[ASHTS_BOXEE]=0;
-				let mmm=hdmagammo(findinventory("RIReapM8"));
+			#### # 0 {
+				let mmm = hdmagammo(findinventory("RIReapM8"));
 				if (mmm) {
-					invoker.weaponstatus[ASHTS_MAG]=mmm.TakeMag(true);
-					A_StartSound("weapons/smgmagclick",CHAN_BODY);
+					invoker.weaponstatus[ASHTS_BOXER] = 1;
+					invoker.weaponstatus[ASHTS_BOXEE] = 0;
+
+					invoker.weaponstatus[ASHTS_MAG] = mmm.TakeMag(true);
+					A_StartSound("weapons/smgmagclick", CHAN_BODY);
 				}
 			}
 			ASTE JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 2 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
+			#### # 2 offset(8,42) A_MuzzleClimb(frandom(0.2, -0.8), frandom(-0.2, 0.4));
 			ASTD JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 2 offset(8,42) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
-			#### # 0 A_StartSound("weapons/rprdrmin",CHAN_BODY);
+			#### # 2 offset(8,42) A_MuzzleClimb(frandom(0.2, -0.8), frandom(-0.2, 0.4));
+			#### # 0 A_StartSound("weapons/rprdrmin", CHAN_BODY);
 			ASTC JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 2 offset(6,36);
 			goto reloadend;
@@ -1045,8 +1063,7 @@ class RIReaper:HDWeapon{
 			#### # 4 offset(4,28);
 			ASTB JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 4 offset(4,32);
-			#### # 0 offset(4,32) { if (invoker.weaponstatus[0]&ASHTF_JUSTUNLOAD)setweaponstate("unloaderchamber");}
-			goto chamber;
+			#### # 0 offset(4,32) A_JumpIf(invoker.weaponstatus[0]&ASHTF_JUSTUNLOAD, "unloaderchamber");
 		chamber:
 			ASTG JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 4 offset(6,36);
@@ -1055,20 +1072,31 @@ class RIReaper:HDWeapon{
 			#### # 0 A_StartSound("weapons/rprbolt",CHAN_WEAPON);
 			#### # 2 offset(8,36);
 			ASTI JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 2 offset(10,36) {if (!invoker.weaponstatus[ASHTS_CHAMBER]==0)invoker.weaponstatus[ASHTS_CHAMBER]=2;}
+			#### # 2 offset(10,36) {
+				if (!invoker.weaponstatus[ASHTS_CHAMBER]==0) {
+					invoker.weaponstatus[ASHTS_CHAMBER]=2;
+				}
+			}
 			#### # 2 offset(10,36) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
 			#### # 0 offset(10,36) {
-				class<actor>which=invoker.weaponstatus[ASHTS_CHAMBER]>2?"HDShellAmmo":"RISpentShell";
-				if (invoker.weaponstatus[ASHTS_CHAMBER]>=2) {
-				A_SpawnItemEx(which,
-					cos(pitch)*10,0,height-8-sin(pitch)*10,
-					vel.x,vel.y,vel.z,
-					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH);
-				invoker.weaponstatus[ASHTS_MAG]--;
-				invoker.weaponstatus[ASHTS_CHAMBER]=3;
-				} else if (invoker.weaponstatus[ASHTS_CHAMBER]==0) {
-				invoker.weaponstatus[ASHTS_MAG]--;
-				invoker.weaponstatus[ASHTS_CHAMBER]=3;
+				if (invoker.weaponstatus[ASHTS_CHAMBER] >= 2) {
+					class<actor> which = invoker.weaponstatus[ASHTS_CHAMBER] > 2
+						? "HDFumblingShell"
+						: "RISpentShell";
+
+					A_SpawnItemEx(
+						which,
+						cos(pitch) * 10, 0, height - 8 - sin(pitch) * 10,
+						vel.x, vel.y, vel.z,
+						0,
+						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+
+					invoker.weaponstatus[ASHTS_MAG]--;
+					invoker.weaponstatus[ASHTS_CHAMBER] = 3;
+				} else if (invoker.weaponstatus[ASHTS_CHAMBER] == 0) {
+					invoker.weaponstatus[ASHTS_MAG]--;
+					invoker.weaponstatus[ASHTS_CHAMBER] = 3;
 				}
 			}
 			ASTG JIHGFEDCBA 0 A_ReaperSpriteSelect();
@@ -1087,19 +1115,23 @@ class RIReaper:HDWeapon{
 			#### # 2 offset(10,36);
 			#### # 2 offset(10,36) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
 			#### # 0 offset(10,36) {
-				if (invoker.weaponstatus[ASHTS_CHAMBER]==3) {
-					invoker.weaponstatus[ASHTS_CHAMBER]=0;
-					A_SpawnItemEx("HDShellAmmo",
-						cos(pitch)*10,0,height-8-sin(pitch)*10,
-						vel.x,vel.y,vel.z,
-						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+				if (invoker.weaponstatus[ASHTS_CHAMBER] == 3) {
+					invoker.weaponstatus[ASHTS_CHAMBER] = 0;
+					A_SpawnItemEx(
+						"HDFumblingShell",
+						cos(pitch) * 10, 0, height - 8 - sin(pitch) * 10,
+						vel.x, vel.y, vel.z,
+						0,
+						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 					);
-				} else if (invoker.weaponstatus[ASHTS_CHAMBER]>0) {
-					invoker.weaponstatus[ASHTS_CHAMBER]=0;
-					A_SpawnItemEx("RISpentShell",
-						cos(pitch)*10,0,height-8-sin(pitch)*10,
-						vel.x,vel.y,vel.z,
-						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+				} else if (invoker.weaponstatus[ASHTS_CHAMBER] > 0) {
+					invoker.weaponstatus[ASHTS_CHAMBER] = 0;
+					A_SpawnItemEx(
+						"RISpentShell",
+						cos(pitch) * 10, 0, height - 8 - sin(pitch) * 10,
+						vel.x, vel.y, vel.z,
+						0,
+						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 					);
 				}
 			}
@@ -1112,11 +1144,7 @@ class RIReaper:HDWeapon{
 			ASTC JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 3 offset(6,36);
 			ASTB JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 3 offset(6,36) {
-				if (invoker.weaponstatus[ASHTS_CHAMBER]<3&&invoker.weaponstatus[ASHTS_MAG]>0) {
-					setweaponstate("chamber");
-				}
-			}
+			#### # 3 offset(6,36) A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] < 3 && invoker.weaponstatus[ASHTS_MAG] > 0, "chamber");
 		reloadendend:
 			ASTB JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 3 offset(4,32) A_MuzzleClimb(frandom(0.2,-0.8),frandom(-0.2,0.4));
@@ -1127,7 +1155,7 @@ class RIReaper:HDWeapon{
 
 		altreload:
 			#### # 0 {
-				invoker.weaponstatus[ASHTS_FLAGS]&=~ASHTF_JUSTUNLOAD;
+				invoker.weaponstatus[ASHTS_FLAGS] &= ~ASHTF_JUSTUNLOAD;
 			}
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1, "altreloadgl");
 			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2, "altreloadzm");
@@ -1137,29 +1165,31 @@ class RIReaper:HDWeapon{
 			#### # 0 A_JumpIf(!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER)&&countinv("HDRocketAmmo"),"unloadgrenade");
 			goto nope;
 		altreloadzm:
-			#### # 0{
-				invoker.weaponstatus[ASHTS_FLAGS]&=~ASHTF_JUSTUNLOAD;
-				if ( // full mag, no jam, not unload-only - why hit reload at all?
-					!(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN)
-					&&invoker.weaponstatus[ASHTS_ZMAG]%100>=50
-					&&!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD)
+			#### # 0 {
+				invoker.weaponstatus[ASHTS_FLAGS] &= ~ASHTF_JUSTUNLOAD;
+			}
+			#### # 0 A_JumpIf( // full mag, no jam, not unload-only - why hit reload at all?
+				!invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN
+				&& invoker.weaponstatus[ASHTS_ZMAG] % 100 >= 50
+				&& !invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD,
+				"nope");
+			#### # 0 {
+				// if jammed, treat as unloading
+				if (
+					invoker.weaponstatus[ASHTS_ZMAG] < 0
+					&& invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN
 				) {
-					setweaponstate("nope");
-				} else if ( // if jammed, treat as unloading
-					invoker.weaponstatus[ASHTS_ZMAG]<0
-					&&invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN
-				) {
-					invoker.weaponstatus[ASHTS_FLAGS]|=ASHTF_JUSTUNLOAD;
+					invoker.weaponstatus[ASHTS_FLAGS] |= ASHTF_JUSTUNLOAD;
 					setweaponstate("ZMunloadchamber");
-				} else if (!HDMagAmmo.NothingLoaded(self,"HD4mMag")) {
-					setweaponstate("unloadmag");
 				}
-			}goto nope;
+			}
+			#### # 0 A_JumpIf(!HDMagAmmo.NothingLoaded(self,"HD4mMag"), "unloadmag");
+			goto nope;
 
-		//unload is also reload. Genius
+		// unload is also reload. Genius
 		unloadgrenade:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0{
+			#### # 0 {
 				A_SetCrosshair(21);
 				A_MuzzleClimb(-0.3,-0.3);
 			}
@@ -1171,30 +1201,41 @@ class RIReaper:HDWeapon{
 			#### # 2 offset(8,48) {
 				A_StartSound("weapons/grenopen",5);
 				A_MuzzleClimb(-0.3,-0.3);
-				if (invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER)A_StartSound("weapons/grenreload",CHAN_WEAPON);
+
+				if (invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER) {
+					A_StartSound("weapons/grenreload", CHAN_WEAPON);
+				}
 			}
 			ASTK JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 10 offset(10,49) {
 				if (!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER)) {
-					if (!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD))A_SetTics(3);
+					if (!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD)) {
+						A_SetTics(3);
+					}
+
 					return;
 				}
-				invoker.weaponstatus[ASHTS_FLAGS]&=~ASHTF_GZCHAMBER;
+
+				invoker.weaponstatus[ASHTS_FLAGS] &= ~ASHTF_GZCHAMBER;
+
 				if (
 					!PressingUnload()
-					||A_JumpIfInventory("HDRocketAmmo",0,"null")
+					|| A_JumpIfInventory("HDRocketAmmo", 0, "null")
 				) {
-					A_SpawnItemEx("HDRocketAmmo",
-						cos(pitch)*10,0,height-10-10*sin(pitch),vel.x,vel.y,vel.z,0,
+					A_SpawnItemEx(
+						"HDRocketAmmo",
+						cos(pitch) * 10, 0, height - 10 - 10 * sin(pitch),
+						vel.x, vel.y, vel.z,
+						0,
 						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 					);
-				} else{
-					A_StartSound("weapons/pocket",5);
-					A_GiveInventory("HDRocketAmmo",1);
-					A_MuzzleClimb(frandom(0.8,-0.2),frandom(0.4,-0.2));
+				} else {
+					A_StartSound("weapons/pocket", 5);
+					A_GiveInventory("HDRocketAmmo", 1);
+					A_MuzzleClimb(frandom(0.8, -0.2), frandom(0.4, -0.2));
 				}
 			}
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD,"greloadend");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_JUSTUNLOAD, "greloadend");
 		loadgrenade:
 			#### # 4 offset(10,50) A_StartSound("weapons/pocket",CHAN_WEAPON);
 			#### # 8 offset(10,50) A_MuzzleClimb(frandom(-0.2,0.8),frandom(-0.2,0.4));
@@ -1240,7 +1281,7 @@ class RIReaper:HDWeapon{
 				} else if (!(invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_GZCHAMBER)) {
 					//no shot but can chamber
 					setweaponstate("chamber_premanual");
-				} else{
+				} else {
 					A_GunFlash("ZMflash");
 					A_WeaponReady(WRF_NONE);
 					if (invoker.weaponstatus[ASHTS_ZAUTO]>=2)invoker.weaponstatus[ASHTS_ZAUTO]++;
@@ -1248,44 +1289,54 @@ class RIReaper:HDWeapon{
 			}
 		zmchamber:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_ZMAG] < 1, "nope");
 			#### # 2 offset(0,32) {
-				if (invoker.weaponstatus[ASHTS_ZMAG]<1) {
-					setweaponstate("nope");
-					return;
-				}
-				if (invoker.weaponstatus[ASHTS_ZMAG]%100>0) {
-					if (invoker.weaponstatus[ASHTS_ZMAG]==51)invoker.weaponstatus[ASHTS_ZMAG]=50;
+				if (invoker.weaponstatus[ASHTS_ZMAG] % 100 > 0) {
+					if (invoker.weaponstatus[ASHTS_ZMAG] == 51) {
+						invoker.weaponstatus[ASHTS_ZMAG] = 50;
+					}
+
 					invoker.weaponstatus[ASHTS_ZMAG]--;
-					invoker.weaponstatus[ASHTS_FLAGS]|=ASHTF_GZCHAMBER;
-				} else{
-					invoker.weaponstatus[ASHTS_ZMAG]=min(invoker.weaponstatus[ASHTS_ZMAG],0);
-					A_StartSound("weapons/rifchamber",5);
+					invoker.weaponstatus[ASHTS_FLAGS] |= ASHTF_GZCHAMBER;
+				} else {
+					invoker.weaponstatus[ASHTS_ZMAG] = min(invoker.weaponstatus[ASHTS_ZMAG], 0);
+					A_StartSound("weapons/rifchamber", 5);
 				}
+
 				if (brokenround()) {
 					setweaponstate("jam");
 					return;
 				}
-				if (!invoker.weaponstatus[ASHTS_ZAUTO])A_SetTics(1);
-				else if (invoker.weaponstatus[ASHTS_ZAUTO]>4)setweaponstate("nope");
-				else if (invoker.weaponstatus[ASHTS_ZAUTO]>1)A_SetTics(0);
+
+				if (!invoker.weaponstatus[ASHTS_ZAUTO]) {
+					A_SetTics(1);
+				} else if (invoker.weaponstatus[ASHTS_ZAUTO] > 1) {
+					A_SetTics(0);
+				} else if (invoker.weaponstatus[ASHTS_ZAUTO] > 4) {
+					setweaponstate("nope");
+				}
+
 				A_WeaponReady(WRF_NOFIRE); //not WRF_NONE: switch to drop during cookoff
 			}
 			#### # 0 A_JumpIf(
-				invoker.weaponstatus[ASHTS_HEAT]>RILD_RPRZMCOOKOFF
-				&&invoker.weaponstatus[0]&ASHTF_GZCHAMBER
-				&&!(invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN),
+				invoker.weaponstatus[ASHTS_HEAT] > RILD_RPRZMCOOKOFF
+				&& invoker.weaponstatus[0]&ASHTF_GZCHAMBER
+				&& !invoker.weaponstatus[0]&ASHTF_CHAMBERBROKEN,
 				"cookoff"
 			);
 			#### # 0 A_Refire();
 			goto ready;
 
 		cookoffaltfirelayer:
-			TNT1 AAA 1{
+			TNT1 AAA 1 {
 				if (JustPressed(BT_ALTFIRE)) {
-					invoker.weaponstatus[0]^=ASHTF_GLMODE;
+					invoker.weaponstatus[0] ^= ASHTF_GLMODE;
 					A_SetTics(10);
-				} else if (JustPressed(BT_ATTACK)&&invoker.weaponstatus[0]&ASHTF_GLMODE)A_Overlay(11,"fire2");
-			}stop;
+				} else if (JustPressed(BT_ATTACK) && invoker.weaponstatus[0]&ASHTF_GLMODE) {
+					A_Overlay(11,"fire2");
+				}
+			}
+			stop;
 		cookoff:
 			ASTL JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 0{
@@ -1320,7 +1371,7 @@ class RIReaper:HDWeapon{
 					||invoker.weaponstatus[ASHTS_FLAGS]&ASHTF_CHAMBERBROKEN
 				) {
 					setweaponstate("ZMunloadchamber");
-				} else{
+				} else {
 					setweaponstate("unloadmag");
 				}
 			}
@@ -1357,7 +1408,7 @@ class RIReaper:HDWeapon{
 				) {
 					HDMagAmmo.SpawnMag(self,"HD4mMag",inmag);
 					A_SetTics(1);
-				} else{
+				} else {
 					HDMagAmmo.GiveMag(self,"HD4mMag",inmag);
 					A_StartSound("weapons/pocket",CHAN_WEAPON);
 					if (inmag<51)A_Log(HDCONST_426MAGMSG,true);
@@ -1378,7 +1429,7 @@ class RIReaper:HDWeapon{
 				if (!zmag) {setweaponstate("reloadend");return;}
 				A_StartSound("weapons/pocket",CHAN_WEAPON);
 				if (zmag.DirtyMagsOnly())invoker.weaponstatus[0]|=ASHTF_LOADINGDIRTY;
-				else{
+				else {
 					invoker.weaponstatus[0]&=~ASHTF_LOADINGDIRTY;
 					A_SetTics(10);
 				}
@@ -1401,8 +1452,11 @@ class RIReaper:HDWeapon{
 		loadmagdirty:
 			ASTJ JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 0{
-				if (PressingReload())invoker.weaponstatus[0]|=ASHTF_STILLPRESSINGRELOAD;
-				else invoker.weaponstatus[0]&=~ASHTF_STILLPRESSINGRELOAD;
+				if (PressingReload()) {
+					invoker.weaponstatus[0] |= ASHTF_STILLPRESSINGRELOAD;
+				} else {
+					invoker.weaponstatus[0] &= ~ASHTF_STILLPRESSINGRELOAD;
+				}
 			}
 			#### # 3 offset(-15,45)A_StartSound("weapons/rifleload",CHAN_WEAPON);
 			#### # 1 offset(-15,42)A_WeaponMessage(HDCONST_426MAGMSG,70);
@@ -1530,19 +1584,23 @@ class RIReaper:HDWeapon{
 
 		// Spawn States
 		spawn:
-			ASHT A 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1,"spawngl");
-			#### A 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2,"spawnzm");
-			#### A -1{
+			ASHT DCBA 0;
+			ASHG DCBA 0;
+			ASHR FEDCBA 0;
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 1,"spawngl");
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_UNDERBARREL] == 2,"spawnzm");
+		spawnnormal:
+			ASHT A -1 nodelay {
 				if (invoker.weaponstatus[ASHTS_MAG]<0)frame=1;
 				if (invoker.weaponstatus[ASHTS_BOXER]==1&&invoker.weaponstatus[ASHTS_MAG]>=0)frame=4;
 			}
 		spawngl:
-			ASHG A -1 nodelay{
+			ASHG A -1 nodelay {
 				if (invoker.weaponstatus[ASHTS_MAG]<0)frame=1;
 				if (invoker.weaponstatus[ASHTS_BOXER]==1&&invoker.weaponstatus[ASHTS_MAG]>=0)frame=4;
 			}
 		spawnzm:
-			ASHR A -1 nodelay{
+			ASHR A -1 nodelay {
 				// A Drum 450
 				// B -Drum 450
 				// C Drum -450
@@ -1609,19 +1667,18 @@ class RIReaper:HDWeapon{
 	}
 
 	override void InitializeWepStats(bool idfa) {
-		weaponstatus[ASHTS_MAG]=20;
-		weaponstatus[ASHTS_CHAMBER]=3;
-		weaponstatus[ASHTS_BOXER]=0;
-		weaponstatus[ASHTS_BOXEE]=0;
-		if (!idfa)weaponstatus[ASHTS_AUTO]=0;
+		weaponstatus[ASHTS_MAG] = weaponstatus[ASHTS_BOXER] ? 8 : 20;
+		weaponstatus[ASHTS_CHAMBER] = 3;
+		weaponstatus[ASHTS_BOXEE] = 0;
+		if (!idfa)weaponstatus[ASHTS_AUTO] = 0;
 
 		switch (weaponstatus[ASHTS_UNDERBARREL]) {
 			case 1:
-				weaponstatus[ASHTS_FLAGS]|=ASHTF_GZCHAMBER;
+				weaponstatus[ASHTS_FLAGS] |= ASHTF_GZCHAMBER;
 				break;
 			case 2:
-				weaponstatus[ASHTS_FLAGS]|=ASHTF_GZCHAMBER;
-				weaponstatus[ASHTS_ZMAG]=51;
+				weaponstatus[ASHTS_FLAGS] |= ASHTF_GZCHAMBER;
+				weaponstatus[ASHTS_ZMAG] = 51;
 				break;
 			default:
 				break;
@@ -1646,8 +1703,8 @@ enum RPRstatus{
 	ASHTS_HEAT=5,
 	ASHTS_ZMAG=6,
 	ASHTS_ZAUTO=7,
-	ASHTS_BOXER=8,
-	ASHTS_BOXEE=9,
+	ASHTS_BOXER=8, // 0 drum mag loaded, 1 box mag loaded
+	ASHTS_BOXEE=9, // 0 reload same mag type, 1 reload other mag type
 	ASHTS_SIGHTS=10,
 	ASHTS_UNDERBARREL=11, // 0 none, 1 UBGL, 2 UBZM
 };
@@ -1661,26 +1718,32 @@ class ReaperRandom:IdleDummy {
 				if (wep) {
 					let lll=random(0,6);
 
+					let magType = !random(0,2) ? "RIReapM8" : "RIReapD20";
+
+					wep.weaponstatus[ASHTS_BOXER] = magType == "RIReapM8";
+
 					if (lll<=3) {
 						// Summon Standard Reaper w/ Drum Mags
-						spawn("RIReapD20",pos+(7,0,0),ALLOW_REPLACE);
-						spawn("RIReapD20",pos+(5,0,0),ALLOW_REPLACE);
+						spawn(magType,pos+(7,0,0),ALLOW_REPLACE);
+						spawn(magType,pos+(5,0,0),ALLOW_REPLACE);
 					} else if (lll==6) {
 
 						// Summon UBZM Reaper w/ Box Mags
 						wep.weaponstatus[ASHTS_UNDERBARREL] = 2;
-						spawn("RIReapM8",pos+(10,0,0),ALLOW_REPLACE);
-						spawn("RIReapM8",pos+(9,0,0),ALLOW_REPLACE);
+						spawn(magType,pos+(10,0,0),ALLOW_REPLACE);
+						spawn(magType,pos+(9,0,0),ALLOW_REPLACE);
 						spawn("HD4mMag",pos+(8,0,0),ALLOW_REPLACE);
 						spawn("HD4mMag",pos+(6,0,0),ALLOW_REPLACE);
-					} else{
+					} else {
 
 						// Summon UBGL Reaper w/ Drum Mag
 						wep.weaponstatus[ASHTS_UNDERBARREL] = 1;
-						spawn("HDRocketAmmo",pos+(10,0,0),ALLOW_REPLACE);
+						spawn(magType,pos+(10,0,0),ALLOW_REPLACE);
 						spawn("HDRocketAmmo",pos+(8,0,0),ALLOW_REPLACE);
-						spawn("RIReapD20",pos+(5,0,0),ALLOW_REPLACE);
+						spawn("HDRocketAmmo",pos+(5,0,0),ALLOW_REPLACE);
 					}
+
+					wep.InitializeWepStats(false);
 				}
 			}
 			stop;
