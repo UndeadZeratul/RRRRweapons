@@ -8,9 +8,6 @@ version "4.13"
 #include "zscript/RightInfinity/weapons/Bronto-Buddy/BrontoBuddy.zs"
 #include "zscript/RightInfinity/weapons/Khleb/Khleb.zs"
 #include "zscript/RightInfinity/weapons/Reaper/Reaper.zs"
-#include "zscript/RightInfinity/weapons/Reaper/ReaperGL.zs"
-#include "zscript/RightInfinity/weapons/Reaper/ReaperZM.zs"
-#include "zscript/RightInfinity/weapons/Reaper/ReaperSpawner.zs"
 #include "zscript/RightInfinity/weapons/Thompson/Thompson.zs"
 
 // Spawners
