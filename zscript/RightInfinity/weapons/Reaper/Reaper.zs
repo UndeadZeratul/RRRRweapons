@@ -803,7 +803,7 @@ class RIReaper : HDWeapon {
 
 		// TODO: Determine if still used
 		unloadchamber:
-			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
+			ASTI JIHGFEDCBA 0 A_ReaperSpriteSelect();
 			#### # 4 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] < 1, "nope");
 			#### # 10 {
 				class<actor> which = invoker.weaponstatus[ASHTS_CHAMBER] > 1
@@ -824,9 +824,8 @@ class RIReaper : HDWeapon {
 
 
 		loadchamber:
-			ASTA JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] > 0, "nope");
-			#### # 0 A_JumpIf(!countinv("HDShellAmmo"), "nope");
+			ASTI JIHGFEDCBA 0 A_ReaperSpriteSelect();
+			#### # 0 A_JumpIf(invoker.weaponstatus[ASHTS_CHAMBER] > 0 || !countinv("HDShellAmmo"), "nope");
 			#### # 1 offset(0, 34) A_StartSound("weapons/pocket", CHAN_WEAPON);
 			#### # 1 offset(2, 36);
 			#### # 1 offset(5, 40);
@@ -877,11 +876,6 @@ class RIReaper : HDWeapon {
 			#### # 0 {
 				invoker.weaponstatus[0] &= ~ASHTF_JUSTUNLOAD;
 			}
-			// #### # 0 A_JumpIf(
-			// 	(invoker.weaponstatus[ASHTS_MAG] >= (invoker.weaponstatus[ASHTS_BOXER] ? 8 : 20))
-			// 	&& invoker.weaponstatus[ASHTS_CHAMBER] > 2,
-			// 	"nope"
-			// );
 			#### # 0 {
 				if (HDMagAmmo.NothingLoaded(self, "RIReapD20") || HDMagAmmo.NothingLoaded(self, "RIReapM8")) {
 					if (
@@ -1099,11 +1093,7 @@ class RIReaper : HDWeapon {
 			#### # 0 A_StartSound("weapons/rprbolt", CHAN_WEAPON);
 			#### # 2 offset(8, 36);
 			ASTI JIHGFEDCBA 0 A_ReaperSpriteSelect();
-			#### # 2 offset(10, 36) {
-				if (invoker.weaponstatus[ASHTS_CHAMBER] > 1) {
-					invoker.weaponstatus[ASHTS_CHAMBER] = 2;
-				}
-			}
+			#### # 2 offset(10, 36);
 			#### # 2 offset(10, 36) A_MuzzleClimb(frandom(0.2, -0.8), frandom(-0.2, 0.4));
 			#### # 0 offset(10, 36) {
 				if (invoker.weaponstatus[ASHTS_CHAMBER] > 0) {
