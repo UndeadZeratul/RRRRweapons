@@ -66,7 +66,7 @@ MENU_WITHALL                           = "With All";
 MENU_RESETWEP                          = "Reset Weapon Options";
 MENU_RESETMAG                          = "Reset Magazine Options";
 MENU_RESETPERSISTENCY                  = "Reset Persistence Options";
-RRRR_RESETALLOPTIONS                   = "Reset all options for Icarus Innovations Improved";
+RRRR_RESETALLOPTIONS                   = "Reset all options for RightInfinity's Revolting Revolutionary Rweapons";
 
 // Khleb Options Text
 MENU_KHLEB_TITLE                       = "------ Khleb Options ------";

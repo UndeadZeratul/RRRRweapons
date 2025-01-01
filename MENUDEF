@@ -46,7 +46,7 @@ OptionMenu "khlebSpawning" {
 	StaticText "$MENU_SPAWNOPTIONS", "Red"
     StaticText "$MENU_KHLEB_SPAWNTEXT", "White"
 	ScaleSlider "$MENU_WEPSPAWNRATE", "khleb_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
-	SafeCommand "$MENU_RESETWEP", "resetcvar khleb_hunter_spawn_bias"
+	SafeCommand "$MENU_RESETWEP", "resetcvar khleb_spawn_bias"
  	StaticText ""
 
 	StaticText "$MENU_KHLEB_BACKPACKS", "White"
