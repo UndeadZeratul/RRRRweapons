@@ -3,11 +3,14 @@
 TAG_BRONTOBUDDY                        = "Brontornis Cannon W/Bolt Rack";
 TAG_KHLEB                              = "Khleb";
 TAG_REAPER                             = "Reaper Automatic Shotgun";
-TAG_THOMPSON                           = "Thompson Submachine Gun (9mm Repro)";
+TAG_THOMPSON                           = "Thompson Submachine Gun";
+TAG_THOMPSON_NINEMIL                   = "Thompson Submachine Gun (9mm Repro)";
 
 TAG_REAPER_MAG                         = "Reaper Magazine";
 TAG_REAPER_DRUMMAG                     = "Reaper Drum";
-TAG_THOMPSON_DRUMMAG                   = "Thompson Drum";
+TAG_THOMPSON_DRUMMAG                   = "Thompson Drum (9mm Repro)";
+TAG_THOMPSON_45ACPDRUMMAG              = "Thompson Drum";
+TAG_THOMPSON_45ACPBOXMAG               = "Thompson Drum";
 
 PICKUP_BRONTOBUDDY                     = "You got the Brontornis! It's got a neat bolt rack!";
 PICKUP_KHLEB                           = "It's Khleb-bering time!";
@@ -15,10 +18,13 @@ PICKUP_REAPER                          = "You got the Reaper Automatic Shotgun!"
 PICKUP_REAPER_GL                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Grenade Launcher!";
 PICKUP_REAPER_ZM                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Carbine!";
 PICKUP_THOMPSON                        = "You got the Thompson SMG! Rata-tat-tat!";
+PICKUP_THOMPSON_NINEMIL                = "You got the Thompson SMG! This one's a reproduction...";
 
 PICKUP_REAPER_MAG                      = "Picked up a 12 Gauge Magazine.";
 PICKUP_REAPER_DRUMMAG                  = "Picked up a 12 Gauge Drum Magazine.";
 PICKUP_THOMPSON_DRUMMAG                = "Picked up a 9mm Drum magazine.";
+PICKUP_THOMPSON_45ACPDRUMMAG           = "Picked up a .45 ACP Drum magazine.";
+PICKUP_THOMPSON_45ACPBOXMAG            = "Picked up a .45 ACP magazine.";
 
 OB_KHLEB                               = "%k pyhiscally removed a chunk of %o and threw that s#&! on the floor";
 OB_REAPER                              = "%k called a %o harvest.";

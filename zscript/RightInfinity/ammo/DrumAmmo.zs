@@ -1,10 +1,13 @@
-// ------------------------------------------------------------
-// 9mm Ammo
-// ------------------------------------------------------------
 const ENC_TMPS_DRM_EMPTY=56; //thick boi
 const ENC_TMPS_DRM=ENC_TMPS_DRM_EMPTY+ENC_9_LOADED*70;
 const ENC_TMPS_DRM_LOADED=ENC_TMPS_DRM_EMPTY*0.8; 
 const RILD_TMPDRM="TDM";
+const ENC_TMPS_45ACPDRM=ENC_TMPS_DRM_EMPTY+ENC_45ACPLOADED*50;
+const ENC_TMPS_45ACPDRM_LOADED=ENC_TMPS_DRM_EMPTY*0.8; 
+const RILD_TMP45ACPDRM="T4D";
+const ENC_TMPS_45ACPMAG=ENC_9MAG30_EMPTY+ENC_45ACPLOADED*20;
+const ENC_TMPS_45ACPMAG_LOADED=ENC_9MAG30_EMPTY*0.8; 
+const RILD_TMP45ACPMAG="T4M";
 const ENC_AST_DRM_EMPTY=56; //thiccer boi
 const ENC_AST_DRM=ENC_AST_DRM_EMPTY+0.6*20;
 const ENC_AST_DRM_LOADED=ENC_AST_DRM_EMPTY*0.8; 
@@ -15,6 +18,9 @@ const ENC_AST_STK_LOADED=ENC_TMPS_DRM_EMPTY*0.5;
 const RILD_ASTSTK="RSM";
 
 
+// ------------------------------------------------------------
+// 9mm Ammo
+// ------------------------------------------------------------
 class RITmpsD70:HD9mMag15{
 	default{
 		//$Category "Ammo/Hideous Destructor/"
@@ -94,12 +100,12 @@ class RITmpsD70:HD9mMag15{
 	override void GetItemsThatUseThis(){
 		itemsthatusethis.push("RIThompson");
 	}
-		override string,string,name,double getmagsprite(int thismagamt){
+	override string,string,name,double getmagsprite(int thismagamt){
 		string magsprite;
 		double fmag=10;
 		for(int i=thismagamt;i>0;i--){
-		fmag++;
-		if(fmag>4)fmag=0;
+			fmag++;
+			if(fmag>4)fmag=0;
 		}
 		if(thismagamt==0)magsprite="TDRMU0";
 		else if(fmag==0)magsprite="TDRMZ0";
@@ -129,6 +135,165 @@ class RIThompsonEmptyMag:IdleDummy{
 		destroy();
 	}
 }
+
+// ------------------------------------------------------------
+// .45 ACP Ammo
+// ------------------------------------------------------------
+
+
+class RITmpsD50:HD9mMag15{
+	default{
+		//$Category "Ammo/Hideous Destructor/"
+		//$Title "Drum SMG Magazine"
+		//$Sprite "TDRMA0"
+
+		hdmagammo.maxperunit 50;
+		hdmagammo.roundtype "HD45ACPAmmo";
+		hdmagammo.roundbulk ENC_45ACPLOADED;
+		hdmagammo.magbulk ENC_TMPS_DRM_EMPTY;
+		tag "$TAG_THOMPSON_45ACPDRUMMAG";
+		inventory.pickupmessage "$PICKUP_THOMPSON_45ACPDRUMMAG";
+		hdpickup.refid RILD_TMP45ACPDRM;
+	}
+	override bool Extract(){
+		SyncAmount();
+		int mindex=mags.size()-1;
+		if(
+			mags.size()<1
+			||mags[mags.size()-1]<1
+			||owner.A_JumpIfInventory(roundtype,0,"null")
+		)return false;
+		HDF.Give(owner,roundtype,1);
+		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
+		mags[mags.size()-1]--;
+		// extracttime=6+(mags[mindex]*0.08); //0.058 orig calc, felt bad
+		if(mags[mindex]>=60){
+			extracttime=10;
+		}else if(mags[mindex]>=50){
+			extracttime=7;
+		}else if(mags[mindex]>=40){
+			extracttime=6;
+		}else if(mags[mindex]>=30){
+			extracttime=5;
+		}else if(mags[mindex]>=20){
+			extracttime=4;
+		}else if(mags[mindex]>=10){
+			extracttime=3;
+		}else{
+			extracttime=2;
+		}
+		if(mags[mindex]==0){
+			owner.A_StartSound("weapons/tmpdrumfin",CHAN_WEAPON);
+		}
+		return true;
+	}
+	override bool Insert(){
+		SyncAmount();
+		int mindex=mags.size()-1;
+		if(
+			mags.size()<1
+			||mags[mags.size()-1]>=maxperunit
+			||!owner.countinv(roundtype)
+		)return false;
+		owner.A_TakeInventory(roundtype,1,TIF_NOTAKEINFINITE);
+		owner.A_StartSound("weapons/rifleclick2",CHAN_WEAPON);
+		mags[mags.size()-1]++;
+		// inserttime=6+(mags[mindex]*0.1);
+		if(mags[mindex]>=60){
+			inserttime=10;
+		}else if(mags[mindex]>=50){
+			inserttime=9;
+		}else if(mags[mindex]>=40){
+			inserttime=8;
+		}else if(mags[mindex]>=30){
+			inserttime=7;
+		}else if(mags[mindex]>=20){
+			inserttime=6;
+		}else if(mags[mindex]>=10){
+			inserttime=5;
+		}else{
+			inserttime=5;
+		}
+		return true;
+	}
+	
+	override void GetItemsThatUseThis(){
+		itemsthatusethis.push("RIThompson");
+	}
+	override string,string,name,double getmagsprite(int thismagamt){
+		string magsprite;
+		double fmag=10;
+		for(int i=thismagamt;i>0;i--){
+			fmag++;
+			if(fmag>4)fmag=0;
+		}
+		if(thismagamt==0)magsprite="TDRMU0";
+		else if(fmag==0)magsprite="TDRMZ0";
+		else if(fmag==1)magsprite="TDRMY0";
+		else if(fmag==2)magsprite="TDRMX0";
+		else if(fmag==3)magsprite="TDRMW0";
+		else if(fmag==4)magsprite="TDRMV0";
+		else magsprite="TDRMV0";
+		return magsprite,"45RNA0","HD45ACPAmmo",1.5;
+	}
+	states{
+	spawn:
+		TDRM D -1;
+		stop;
+	spawnempty:
+		TDRM C -1{
+			brollsprite=true;brollcenter=true;
+			roll=randompick(2,2,2,3,3)*90;
+		}stop;
+	}
+}
+
+class RIThompsonEmptyDrumMag:IdleDummy{
+	override void postbeginplay(){
+		super.postbeginplay();
+		HDMagAmmo.SpawnMag(self,"RITmpsD50",0);
+		destroy();
+	}
+}
+
+
+class RITmpsM20:HD9mMag15{
+	default{
+		//$Category "Ammo/Hideous Destructor/"
+		//$Title "SMG Magazine"
+		//$Sprite "CLP3A0"
+
+		hdmagammo.maxperunit 20;
+		hdmagammo.magbulk ENC_9MAG30_EMPTY;
+		tag "$TAG_THOMPSON_45ACPBOXMAG";
+		inventory.pickupmessage "$PICKUP_THOMPSON_45ACPBOXMAG";
+		hdpickup.refid RILD_TMP45ACPMAG;
+	}
+	override void GetItemsThatUseThis(){
+		itemsthatusethis.push("RIThompson");
+	}
+	override string,string,name,double getmagsprite(int thismagamt){
+		string magsprite=(thismagamt>0)?"CLP3A0":"CLP3B0";
+		return magsprite,"45RNA0","HD45ACPAmmo",2.;
+	}
+	states{
+	spawn:
+		CLP3 A -1;
+		stop;
+	spawnempty:
+		CLP3 B -1 A_SpawnEmpty();
+		stop;
+	}
+}
+
+class RIThompsonEmptyBoxMag:IdleDummy{
+	override void postbeginplay(){
+		super.postbeginplay();
+		HDMagAmmo.SpawnMag(self,"RITmpsM20",0);
+		destroy();
+	}
+}
+
 // ------------------------------------------------------------
 // SHOT Ammo
 // ------------------------------------------------------------
