@@ -1,7 +1,80 @@
-Hideous Destructor, RightInfinity's Revolting Revolutionary Rweapons (..Nailed it)
-Additional Polish by VinceHo/Grim96
+# RightInfinity's Revolting Revolutionary Rweapons
+_..Nailed it_
 
-Changes:
+
+_Original Author: RightInfinity  
+Additional Polish by VinceHo/Grim96, Undead_Zeratul_
+
+_Requires [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-Recasted) by the HDest Community._
+
+### Weapons
+
+#### Raycob Reaper Automatic Shotgun
+ - Classname `RIreaper`
+ - Loadout Code	`RPR`
+   - `mag 0/1`: Whether to start with a drum/box mag
+   - `firemode 0-2`: semi/burst/auto
+   - `chose 0-7`: 0 = Skeet, 7 = Full Choke
+   - `sight`: Alternate sights
+   - `gl`: Adds an Underbarrrel Rocquette Grenade Launcher
+   - `zm`: Adds an Underbarrel ZM-66 Carbine
+
+ + Accepts both it's drum magazines and 8 round box mags.
+ + Hold Firemode to exchange magazine types.
+ + Press Reload + Firemode to force a reload with a full magazine.
+ + Accepts the same 0-7 choke settings as the hunter and slayer
+ + Has optional glow sights, probably useful as only decoration. use sights 0-1 in the loadout code
+ + With UBGL:
+   + Got the boomer tuber underneath. Spoldes reel gud
+ + With UBZM:
+   + Hit Alt fire to swap gun you're using
+   + Altreload Reloads the ZM at all times, and clears jams that happen
+   + Unload is context senstive and will prioritize the selected gun first
+
+#### Brontoris Cannon W/Bolt Rack
+ - Classname `RIBrontoBuddy`
+ - Loadout Code `BRR`
+ + Standard bronto that has a shotgun-like sidesaddle on the side.
+ + Due to the shell weight and bulk, does not speed up reload, and is primarly meant for soldiers who use a bronto in a tertiary role, and would love to save some bulk in their backpack or pockets
+
+### Magazines
+
+#### Reaper 12 Gauge Drum
+ - Classname `RIReapD20`
+ - Loadout Code	`RDM`
+
+#### Reaper 12 Gauge Magazine
+ - Classname `RIReapM8`
+ - Loadout code `RSM`
+
+#### Thompson m1921/28 (-ish) Sub-machine Gun
+ - Classname `RIThompson`
+ - Loadout Code `TMP`
+   - `ninemil`: Rechambers into a 9x21mm Reproduction Model
+   - `firemode 0/1`: semi/auto
+ + Accepts both it's Drum Magazines as well as its Box Magazines.
+   + When configured as a 9x21mm Reproduction Model, standard SMG Magazines can be used.
+ + Hold Firemode to exchange magazine types.
+ + Press Reload + Firemode to force a reload with a full magazine.
+ 
+#### Thompson 9x21 Drum magazine
+ -Classname `RITmpsD70`
+ -Loadout code `TDM`
+ 
+#### Thompson .45 ACP Drum magazine
+ -Classname `RITmpsD50`
+ -Loadout code `T4D`
+ 
+#### Thompson .45 ACP Box magazine
+ -Classname `RITmpsM20`
+ -Loadout code `T4M`
+
+### Known issues:
+
+- Reaper ZM does not Cookoff on ground, because I haven't provideded the pile of sprites needed yet.
+
+
+### Changelog:
 
 Planned 4.6.0b Release
   + Fixed Reaper pellet count. Was only firing 7 vs the new shotgun shell's 10
@@ -71,71 +144,19 @@ Everything below, Thanks to VinceHo/Grim96
 
 Please yell at me if my code offends. I'm pretty horrid and need the ruler over the knuckles to learn.
 
-Raycob Reaper Automatic Shotgun
- -Loadout Code	RPR			(Regular)
- -Classname		RIreaper
- + Accepts both it's drum magazines and 8 round box mags.
- + Hold Firemode to exchange magazine types.
- + Press Reload + Firemode to force a reload with a full magazine.
- + Accepts the same 0-7 choke settings as the hunter and slayer
- + Has optional glow sights, probably useful as only decoration. use sights 0-1 in the loadout code
+### Spriting credits:
+- Tommy gun sprites by YukesVonFaust  
+- Captain J for the ppsh drum sprite I edited into a Thompson reload sprite + His USAS 12 sprites that blat good  
+- Potetobloke For the reaper drum base sprite  
 
-Reaper + Rocquette Grenade Launcher
- -Loadout Code	RPG
- -Classname		RIreaperGL
- + Got the boomer tuber underneath. Spoldes reel gud
+### Thanks to:
+- TheBadInfluence for doing better research than I could on the nitty gritty Thompson functions
+- LtSnowolf for being best battle bud and pointing me at BF:BC2.
+- Matt, for having code I can abuse and glue together into something new.
+- Breezwagon for some bug hunting
+- Potetobloke for pointing out I forgot something.
+- Some bloke on FPSBanana for ripping the BC2 sounds.
+- D2Icarus for bug hunting help.
 
-Reaper + ZM66C Underbarrel
- -Loadout Code	RPZ
- -Classname 	RIreaperZM
- + Hit Alt fire to swap gun you're using
- + Altreload Reloads the ZM at all times, and clears jams that happen
- + Unload is context senstive and will prioritize the selected gun first
- 
-Brontoris Cannon W/Bolt Rack
- -Loadout Code	BRR
- -Classname		RIBrontoBuddy
- + Standard bronto that has a shotgun-like sidesaddle on the side.
- + Due to the shell weight and bulk, does not speed up reload, and is primarly meant for soldiers who use a bronto in a tertiary role, and would love to save some bulk in their backpack or pockets
- 
-Reaper 12 Gauge Drum
- -Loadout Code	RDM
- -Classname		RIReapD20
-
-Reaper 12 Gauge Magazine
- -Loadout code 	RSM
- -Classname		RIReapM8
-
-Thompson m1921/28 (-ish) 9x21mm Repro
- -Loadout Code 	TMP
- -Classname		RIThompson
- + Accepts both it's drum magazines and regular 9mm SMG mags.
- + Hold Firemode to exchange magazine types.
- + Press Reload + Firemode to force a reload with a full magazine.
- 
-Thompson Drum magazine
- -Loadout code 	TDM
- -Classname 	RITmpsD70
-
-Known issues:
-	-Reaper ZM does not Cookoff on ground, because I haven't provideded the pile of sprites needed yet.
-
-Spriting credits:
-Tommy gun sprites by YukesVonFaust
-Captain J for the ppsh drum sprite I edited into a Thompson reload sprite + His USAS 12 sprites that blat good
-Potetobloke For the reaper drum base sprite
-
-
-Thanks to:
-TheBadInfluence for doing better research than I could on the nitty gritty Thompson functions
-LtSnowolf for being best battle bud and pointing me at BF:BC2.
-Matt, for having code I can abuse and glue together into something new.
-Breezwagon for some bug hunting
-Potetobloke for pointing out I forgot something.
-Some bloke on FPSBanana for ripping the BC2 sounds.
-D2Icarus for bug hunting help.
-
-TODO:
-	-Bullet visible in reload anim
-
-		
+### TODO:
+- Bullet visible in reload anim

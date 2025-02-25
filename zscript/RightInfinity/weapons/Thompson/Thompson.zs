@@ -20,6 +20,9 @@ class RIThompson:HDWeapon{
 		hdweapon.barrelsize 30,1,3;
 		hdweapon.refid RILD_TMPSN;
 		tag "$TAG_THOMPSON";
+		hdweapon.loadoutcodes "
+			\cufiremode - 0-1, semi/auto
+			\cuninemil - 9mm reproduction model";
 	}
 	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
 	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
@@ -27,24 +30,52 @@ class RIThompson:HDWeapon{
 		return 10+(weaponstatus[TMPS_MAG]<0)?-0.5:(weaponstatus[TMPS_MAG]*0.02);
 	}
 	override double weaponbulk(){
+		let drumMagLoaded=weaponstatus[TMPS_NINEMIL]?ENC_TMPS_DRM_LOADED:ENC_TMPS_45ACPDRM_LOADED;
+		let boxMagLoaded=weaponstatus[TMPS_NINEMIL]?ENC_9MAG30_LOADED:ENC_TMPS_45ACPMAG_LOADED;
+		let roundBulk=weaponstatus[TMPS_NINEMIL]?ENC_9_LOADED:ENC_45ACPLOADED;
+		
 		int mg=weaponstatus[TMPS_MAG];
 		if(mg<0)return 110;
-		else return (110+ENC_TMPS_DRM_LOADED)+mg*ENC_9_LOADED;
+		else return (110 + (weaponstatus[TMPS_BOXER] ? boxMagLoaded : drumMagLoaded)) + mg * roundBulk;
 	}
 	override void failedpickupunload(){
-		failedpickupunloadmag(TMPS_MAG,"RITmpsD70");
+		if (weaponstatus[TMPS_NINEMIL]) {
+			failedpickupunloadmag(TMPS_MAG,"RITmpsD70");
+		} else {
+			failedpickupunloadmag(TMPS_MAG,"RITmpsD50");
+		}
 	}
 	override void DropOneAmmo(int amt){
 		if(owner){
 			amt=clamp(amt,1,10);
-			if(owner.countinv("HDPistolAmmo"))owner.A_DropInventory("HDPistolAmmo",amt*70);
-			else owner.A_DropInventory("RITmpsD70",amt);
+
+			if (weaponstatus[TMPS_NINEMIL]) {
+				if(owner.countinv("HDPistolAmmo"))owner.A_DropInventory("HDPistolAmmo",amt*70);
+				else owner.A_DropInventory("RITmpsD70",amt);
+			} else {
+				if(owner.countinv("HD45ACPAmmo"))owner.A_DropInventory("HD45ACPAmmo",amt*50);
+				else owner.A_DropInventory("RITmpsD50",amt);
+			}
 		}
 	}
 	override void ForceBasicAmmo(){
-		owner.A_TakeInventory("HDPistolAmmo");
-		owner.A_TakeInventory("RITmpsD70");
-		owner.A_GiveInventory("RITmpsD70");
+		if (weaponstatus[TMPS_NINEMIL]) {
+			owner.A_TakeInventory("HDPistolAmmo");
+			owner.A_TakeInventory("RITmpsD70");
+			owner.A_GiveInventory("RITmpsD70");
+		} else {
+			owner.A_TakeInventory("HD45ACPAmmo");
+			owner.A_TakeInventory("RITmpsD50");
+			owner.A_GiveInventory("RITmpsD50");
+		}
+	}
+	override void Tick(){
+		super.Tick();
+
+		setTag(weaponstatus[TMPS_NINEMIL] ? "$TAG_THOMPSON_NINEMIL" : "$TAG_THOMPSON");
+	}
+	override string pickupmessage(){
+		return Stringtable.Localize(weaponstatus[TMPS_NINEMIL] ? "$PICKUP_THOMPSON_NINEMIL" : "$PICKUP_THOMPSON");
 	}
 	override string,double getpickupsprite(){
 		string spr;
@@ -62,31 +93,38 @@ class RIThompson:HDWeapon{
 	}
 	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
 		if(sb.hudlevel == 1){
-			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("RITmpsD70")));
-			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory("HD9mMag30")));
+			let drummagcls=weaponstatus[TMPS_NINEMIL]?"RITmpsD70":"RITmpsD50";
+			let boxmagcls=weaponstatus[TMPS_NINEMIL]?"HD9mMag30":"RITmpsM20";
+
+			let drummagmax=weaponstatus[TMPS_NINEMIL]?70:50;
+			let boxmagmax=weaponstatus[TMPS_NINEMIL]?30:20;
+
+			int nextdrumloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory(drummagcls)));
+			int nextmagloaded=sb.GetNextLoadMag(hdmagammo(hpl.findinventory(boxmagcls)));
+			
 			if(weaponstatus[TMPS_BOXER]==1){
-				if(nextdrumloaded>=70){
+				if(nextdrumloaded>=drummagmax){
 					sb.drawimage("TDRMD0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1.75,1.75));
 				}else if(nextdrumloaded<1){
 					sb.drawimage("TDRMC0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1.75,1.75));
 				}else sb.drawbar(
 					"TDRMNORM","TDRMGREY",
-					nextdrumloaded,70,
+					nextdrumloaded,drummagmax,
 					(-61,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-				sb.drawnum(hpl.countinv("RITmpsD70"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				if(nextmagloaded>=30){
+				sb.drawnum(hpl.countinv(drummagcls),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextmagloaded>=boxmagmax){
 					sb.drawimage("CLP3A0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(3,3));
 				}else if(nextmagloaded<1){
 					sb.drawimage("CLP3B0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(3,3));
 				}else sb.drawbar(
 					"CLP3NORM","CLP3GREY",
-					nextmagloaded,30,
+					nextmagloaded,boxmagmax,
 					(-46,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-				sb.drawnum(hpl.countinv("HD9mMag30"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				sb.drawnum(hpl.countinv(boxmagcls),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
 					-22,-12,"RBRSA3A7","STFULAUT"
 				);
@@ -101,35 +139,36 @@ class RIThompson:HDWeapon{
 				}else{sb.drawwepdot(-28,-27,(3,2));
 				}
 			}else{
-				if(nextdrumloaded>=70){
+				if(nextdrumloaded>=drummagmax){
 					sb.drawimage("TDRMD0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(1.75,1.75));
 				}else if(nextdrumloaded<1){
 					sb.drawimage("TDRMC0",(-46,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextdrumloaded?0.6:1.,scale:(1.75,1.75));
 				}else sb.drawbar(
 					"TDRMNORM","TDRMGREY",
-					nextdrumloaded,70,
+					nextdrumloaded,drummagmax,
 					(-46,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-				sb.drawnum(hpl.countinv("RITmpsD70"),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
-				if(nextmagloaded>=30){
+				sb.drawnum(hpl.countinv(drummagcls),-43,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				if(nextmagloaded>=boxmagmax){
 					sb.drawimage("CLP3A0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,scale:(3,3));
 				}else if(nextmagloaded<1){
 					sb.drawimage("CLP3B0",(-61,-3),sb.DI_SCREEN_CENTER_BOTTOM,alpha:nextmagloaded?0.6:1.,scale:(3,3));
 				}else sb.drawbar(
 					"CLP3NORM","CLP3GREY",
-					nextmagloaded,30,
+					nextmagloaded,boxmagmax,
 					(-61,-3),-1,
 					sb.SHADER_VERT,sb.DI_SCREEN_CENTER_BOTTOM
 				);
-				sb.drawnum(hpl.countinv("HD9mMag30"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
+				sb.drawnum(hpl.countinv(boxmagcls),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM,font.CR_BLACK);
 				sb.drawwepcounter(hdw.weaponstatus[TMPS_AUTO],
 					-20,-12,"RBRSA3A7","STFULAUT"
 				);
 				for(int i=hdw.weaponstatus[TMPS_MAG];i>0;i--){
+					let angle = 360.0 / drummagmax;
 					double RIrad=13; //circle radius
-					double RIx=(RIrad-0)*cos((5.1428571428571428571428571428571*i)-90);
-					double RIy=(RIrad-0)*sin((5.1428571428571428571428571428571*i)-90);
+					double RIx=(RIrad-0)*cos((angle*i)-90);
+					double RIy=(RIrad-0)*sin((angle*i)-90);
 					sb.drawwepdot(-27-(RIx*1),-18-(-RIy*1),(2,2));
 				}
 				if(hdw.weaponstatus[TMPS_CHAMBER]==2){sb.drawwepdot(-26,-17,(3,2));
@@ -201,10 +240,22 @@ class RIThompson:HDWeapon{
 		goto readyend;
 	user3:
 		#### # 0 A_JumpIf(invoker.weaponstatus[TMPS_BOXER]==1,"boxmagman");
-		#### # 0 A_MagManager("RITmpsD70");
+		#### # 0 {
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				A_MagManager("RITmpsD70");
+			} else {
+				A_MagManager("RITmpsD50");
+			}
+		}
 		goto ready;
 	boxmagman:	
-		#### # 0 A_MagManager("HD9mMag30");
+		#### # 0 {
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				A_MagManager("HD9mMag30");
+			} else {
+				A_MagManager("RITmpsM20");
+			}
+		}
 		goto ready;
 
 	altfire:
@@ -252,7 +303,8 @@ class RIThompson:HDWeapon{
 		#### # 1 offset(0,40);
 		#### # 0{
 			if(invoker.weaponstatus[TMPS_CHAMBER]==1){
-				A_SpawnItemEx("HDSpent9mm",
+				let casing=invoker.weaponstatus[TMPS_NINEMIL]?"HDSpent9mm":"HDSpent45ACP";
+				A_SpawnItemEx(casing,
 					cos(pitch)*10,0,height-12-sin(pitch)*10,
 					vel.x,vel.y,vel.z,
 					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH);
@@ -280,7 +332,8 @@ class RIThompson:HDWeapon{
 	flash:
 		TMPZ ABCD 0 A_ThompsonSpriteSelect();
 		#### # 0{
-			let bbb=HDBulletActor.FireBullet(self,"HDB_9",speedfactor:1.2);
+			let bulletcls = invoker.weaponstatus[TMPS_NINEMIL]?"HDB_9":"HDB_45ACP";
+			let bbb=HDBulletActor.FireBullet(self,bulletcls,speedfactor:1.2);
 			A_AlertMonsters();
 			A_ZoomRecoil(0.95);
 			A_StartSound("weapons/tmpshot",CHAN_WEAPON, volume:2.5);
@@ -332,35 +385,63 @@ class RIThompson:HDWeapon{
 		}goto nope;
 	reload:
 		// #### # 0 A_Log("reload shart",true);
-		#### # 3 { if(PressingFiremode())setweaponstate("reloadselect");
-					}
+		#### # 3 {
+			if(PressingFiremode())setweaponstate("reloadselect");
+		}
 		#### # 0{
 			invoker.weaponstatus[0]&=~TMPF_JUSTUNLOAD;
-			if(invoker.weaponstatus[TMPS_BOXER]>0){		
-				if(invoker.weaponstatus[TMPS_MAG]>=30)setweaponstate("nope");
-			}else{
-				if(invoker.weaponstatus[TMPS_MAG]>=70)setweaponstate("nope");
-			}
-			if(HDMagAmmo.NothingLoaded(self,"RITmpsD70")){
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				if(invoker.weaponstatus[TMPS_BOXER]>0){		
+					if(invoker.weaponstatus[TMPS_MAG]>=30)setweaponstate("nope");
+				}else{
+					if(invoker.weaponstatus[TMPS_MAG]>=70)setweaponstate("nope");
+				}
+				if(HDMagAmmo.NothingLoaded(self,"RITmpsD70")){
 					if(HDMagAmmo.NothingLoaded(self,"HD9mMag30")){
 						setweaponstate("nope");
-//						A_Log("auto d70 m30 fail",true);
+	//						A_Log("auto d70 m30 fail",true);
 					}else{
 						invoker.weaponstatus[TMPS_BOXEE]=1;
 						setweaponstate("reloadselect");
-//						A_Log("d70 m30 autoswap",true);
+	//						A_Log("d70 m30 autoswap",true);
 					}
 				}else if(HDMagAmmo.NothingLoaded(self,"HD9mMag30")){
 					if(HDMagAmmo.NothingLoaded(self,"RITmpsD70")){
 						setweaponstate("nope");
-//						A_Log("auto m30 d70 fail",true);
+	//						A_Log("auto m30 d70 fail",true);
 					}else{
 						invoker.weaponstatus[TMPS_BOXEE]=2;
 						setweaponstate("reloadselect");
-//						A_Log("m30 d70 autoswap",true);
+	//						A_Log("m30 d70 autoswap",true);
+					}
+				}
+			} else {
+				if(invoker.weaponstatus[TMPS_BOXER]>0){		
+					if(invoker.weaponstatus[TMPS_MAG]>=20)setweaponstate("nope");
+				}else{
+					if(invoker.weaponstatus[TMPS_MAG]>=50)setweaponstate("nope");
+				}
+				if(HDMagAmmo.NothingLoaded(self,"RITmpsD50")){
+					if(HDMagAmmo.NothingLoaded(self,"RITmpsM20")){
+						setweaponstate("nope");
+	//						A_Log("auto d50 m20 fail",true);
+					}else{
+						invoker.weaponstatus[TMPS_BOXEE]=1;
+						setweaponstate("reloadselect");
+	//						A_Log("d50 m20 autoswap",true);
+					}
+				}else if(HDMagAmmo.NothingLoaded(self,"RITmpsM20")){
+					if(HDMagAmmo.NothingLoaded(self,"RITmpsD50")){
+						setweaponstate("nope");
+	//						A_Log("auto m20 d50 fail",true);
+					}else{
+						invoker.weaponstatus[TMPS_BOXEE]=2;
+						setweaponstate("reloadselect");
+	//						A_Log("m20 d50 autoswap",true);
 					}
 				}
 			}
+		}
 		goto reloadselect;
 	reloadselect:
 		// #### # 0 A_Log("reload select",true);
@@ -393,16 +474,30 @@ class RIThompson:HDWeapon{
 				return;
 			}
 			invoker.weaponstatus[TMPS_MAG]=-1;
-			if(
-				(!PressingUnload()&&!PressingReload())
-				||A_JumpIfInventory("RITmpsD70",0,"null")
-			){
-				HDMagAmmo.SpawnMag(self,"RITmpsD70",magamt);
-				setweaponstate("magout");
-			}else{
-				HDMagAmmo.GiveMag(self,"RITmpsD70",magamt);
-				A_StartSound("weapons/pocket",CHAN_WEAPON);
-				setweaponstate("pocketmag");
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("RITmpsD70",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"RITmpsD70",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"RITmpsD70",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
+			} else {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("RITmpsD50",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"RITmpsD50",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"RITmpsD50",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
 			}
 		}
 	unmagempty:
@@ -445,16 +540,30 @@ class RIThompson:HDWeapon{
 				return;
 			}
 			invoker.weaponstatus[TMPS_MAG]=-1;
-			if(
-				(!PressingUnload()&&!PressingReload())
-				||A_JumpIfInventory("RITmpsD70",0,"null")
-			){
-				HDMagAmmo.SpawnMag(self,"RITmpsD70",magamt);
-				setweaponstate("magout");
-			}else{
-				HDMagAmmo.GiveMag(self,"RITmpsD70",magamt);
-				A_StartSound("weapons/pocket",CHAN_WEAPON);
-				setweaponstate("pocketmag");
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("RITmpsD70",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"RITmpsD70",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"RITmpsD70",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
+			} else {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("RITmpsD50",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"RITmpsD50",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"RITmpsD50",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
 			}
 		}
 	unbox:
@@ -482,17 +591,31 @@ class RIThompson:HDWeapon{
 				setweaponstate("magout");
 				return;
 			}
-			invoker.weaponstatus[TMPS_MAG]=-1;		
-			if(
-				(!PressingUnload()&&!PressingReload())
-				||A_JumpIfInventory("HD9mMag30",0,"null")
-			){
-				HDMagAmmo.SpawnMag(self,"HD9mMag30",magamt);
-				setweaponstate("magout");
-			}else{
-				HDMagAmmo.GiveMag(self,"HD9mMag30",magamt);
-				A_StartSound("weapons/pocket",CHAN_WEAPON);
-				setweaponstate("pocketmag");
+			invoker.weaponstatus[TMPS_MAG]=-1;
+			if (invoker.weaponstatus[TMPS_NINEMIL]) {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("HD9mMag30",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"HD9mMag30",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"HD9mMag30",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
+			} else {
+				if(
+					(!PressingUnload()&&!PressingReload())
+					||A_JumpIfInventory("RITmpsM20",0,"null")
+				){
+					HDMagAmmo.SpawnMag(self,"RITmpsM20",magamt);
+					setweaponstate("magout");
+				}else{
+					HDMagAmmo.GiveMag(self,"RITmpsM20",magamt);
+					A_StartSound("weapons/pocket",CHAN_WEAPON);
+					setweaponstate("pocketmag");
+				}
 			}
 		}
 	pocketmag:
@@ -548,7 +671,8 @@ class RIThompson:HDWeapon{
 		#### # 0 A_JumpIf(invoker.weaponstatus[TMPS_CHAMBER]<=1,"chamber");
 		#### # 0{
 			invoker.weaponstatus[TMPS_MAG]=-1;
-			let mmm=hdmagammo(findinventory("RITmpsD70"));
+			let magcls=invoker.weaponstatus[TMPS_NINEMIL]?"RITmpsD70":"RITmpsD50";
+			let mmm=hdmagammo(findinventory(magcls));
 			if(mmm){
 				invoker.weaponstatus[TMPS_MAG]=mmm.TakeMag(true);
 				A_StartSound("weapons/tmpdrumin",CHAN_BODY);
@@ -575,7 +699,8 @@ class RIThompson:HDWeapon{
 		#### # 2 offset(10,34){
 			invoker.weaponstatus[TMPS_BOXER]=1;
 			invoker.weaponstatus[TMPS_BOXEE]=0;
-			let mmm=hdmagammo(findinventory("HD9mMag30"));
+			let magcls=invoker.weaponstatus[TMPS_NINEMIL]?"HD9mMag30":"RITmpsM20";
+			let mmm=hdmagammo(findinventory(magcls));
 			if(mmm){
 				invoker.weaponstatus[TMPS_MAG]=mmm.TakeMag(true);
 				A_StartSound("weapons/tmpdrumin",CHAN_BODY);
@@ -634,6 +759,9 @@ class RIThompson:HDWeapon{
 	override void loadoutconfigure(string input){
 		int firemode=getloadoutvar(input,"firemode",1);
 		if(firemode>0)weaponstatus[TMPS_AUTO]=clamp(firemode,0,1);
+
+		int ninemil=getloadoutvar(input,"ninemil",1);
+		if (ninemil>0)weaponstatus[TMPS_NINEMIL]=clamp(ninemil,0,1);
 	}
 
 }
@@ -643,9 +771,10 @@ enum TMPStatus{
 	TMPS_FLAGS=0,
 	TMPS_MAG=1, //-1 unmagged
 	TMPS_CHAMBER=2, //0 empty, 1 spent, 2 loaded
-	TMPS_AUTO=3, //0 semi, 1 burst, 2 auto
-	TMPS_BOXER=4,
-	TMPS_BOXEE=5,
+	TMPS_NINEMIL=3,
+	TMPS_AUTO=4, //0 semi, 1 burst, 2 auto
+	TMPS_BOXER=5,
+	TMPS_BOXEE=6
 };
 
 class ThompsonRandom:IdleDummy{
@@ -656,8 +785,8 @@ class ThompsonRandom:IdleDummy{
 			if(!lll)return;
 			lll.special=special;
 			lll.vel=vel;
-			spawn("RITmpsD70",pos+(7,0,0),ALLOW_REPLACE);
-			spawn("RITmpsD70",pos+(5,0,0),ALLOW_REPLACE);
+			spawn("RITmpsD50",pos+(7,0,0),ALLOW_REPLACE);
+			spawn("RITmpsD50",pos+(5,0,0),ALLOW_REPLACE);
 		}stop;
 	}
 }
