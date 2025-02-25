@@ -163,7 +163,8 @@ class RRRRWeaponsHandler : EventHandler {
 
         if (!reapermag_allowBackpacks)       backpackBlacklist.push((Class<Inventory>)('RIReapM8'));
         if (!reaperdrummag_allowBackpacks)   backpackBlacklist.push((Class<Inventory>)('RIReapD20'));
-        if (!thompsondrummag_allowBackpacks) backpackBlacklist.push((Class<Inventory>)('RITmpsD70'));
+        if (!thompsondrummag_allowBackpacks) backpackBlacklist.push((Class<Inventory>)('RITmpsD50'));
+        if (!thompsonboxmag_allowBackpacks)  backpackBlacklist.push((Class<Inventory>)('RITmpsM20'));
 
 
         //------------
@@ -204,6 +205,12 @@ class RRRRWeaponsHandler : EventHandler {
         Array<string> wep_9mmMag;
         wep_9mmMag.push('RIThompson');
         addAmmo('HD9mMag30', wep_9mmMag);
+
+        // .45 ACP Magazines
+        Array<string> wep_45ACPMag;
+        wep_45ACPMag.push('RIThompson');
+        addAmmo('RITmpsD50', wep_45ACPMag);
+        addAmmo('RITmpsM20', wep_45ACPMag);
 
 
         //------------
@@ -246,10 +253,20 @@ class RRRRWeaponsHandler : EventHandler {
         spawns_reaperdummag.push(addItemEntry('ShellBoxPickup', reaperdrummag_shellbox_spawn_bias));
         addItem('RIReapD20', spawns_reaperdummag, reaperdrummag_persistent_spawning);
 
-        // Thompson 70-round Drum
-        Array<RRRRSpawnItemEntry> spawns_thompsondrummag;
-        spawns_thompsondrummag.push(addItemEntry('ClipMagPickup', thompsondrummag_clipmag_spawn_bias));
-        addItem('RITmpsD70', spawns_thompsondrummag, thompsondrummag_persistent_spawning);
+        // Thompson 70-round 9mm Drum
+        // Array<RRRRSpawnItemEntry> spawns_thompsondrummag;
+        // spawns_thompsondrummag.push(addItemEntry('ClipMagPickup', thompsondrummag_clipmag_spawn_bias));
+        // addItem('RITmpsD70', spawns_thompsondrummag, thompsondrummag_persistent_spawning);
+
+        // Thompson 50-round .45 ACP Drum
+        Array<RRRRSpawnItemEntry> spawns_thompson45acpdrummag;
+        spawns_thompson45acpdrummag.push(addItemEntry('ClipMagPickup', thompsondrummag_clipmag_spawn_bias));
+        addItem('RITmpsD50', spawns_thompson45acpdrummag, thompsondrummag_persistent_spawning);
+
+        // Thompson 20-round .45 ACP Magazine
+        Array<RRRRSpawnItemEntry> spawns_thompson45acpboxmag;
+        spawns_thompson45acpboxmag.push(addItemEntry('ClipMagPickup', thompsonboxmag_clipmag_spawn_bias));
+        addItem('RITmpsM20', spawns_thompson45acpboxmag, thompsonboxmag_persistent_spawning);
     }
 
     // Random stuff, stores it and forces negative values just to be 0.

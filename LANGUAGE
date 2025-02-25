@@ -1,120 +1,114 @@
 [en default]
 
-TAG_BRONTOBUDDY                        = "Brontornis Cannon W/Bolt Rack";
-TAG_KHLEB                              = "Khleb";
-TAG_REAPER                             = "Reaper Automatic Shotgun";
-TAG_THOMPSON                           = "Thompson Submachine Gun";
-TAG_THOMPSON_NINEMIL                   = "Thompson Submachine Gun (9mm Repro)";
+TAG_BRONTOBUDDY                             = "Brontornis Cannon W/Bolt Rack";
+TAG_KHLEB                                   = "Khleb";
+TAG_REAPER                                  = "Reaper Automatic Shotgun";
+TAG_THOMPSON                                = "Thompson Submachine Gun";
+TAG_THOMPSON_NINEMIL                        = "Thompson Submachine Gun (9mm Repro)";
 
-TAG_REAPER_MAG                         = "Reaper Magazine";
-TAG_REAPER_DRUMMAG                     = "Reaper Drum";
-TAG_THOMPSON_DRUMMAG                   = "Thompson Drum (9mm Repro)";
-TAG_THOMPSON_45ACPDRUMMAG              = "Thompson Drum";
-TAG_THOMPSON_45ACPBOXMAG               = "Thompson Drum";
+TAG_REAPER_MAG                              = "Reaper Magazine";
+TAG_REAPER_DRUMMAG                          = "Reaper Drum";
+TAG_THOMPSON_DRUMMAG                        = "Thompson Drum (9mm Repro)";
+TAG_THOMPSON_45ACPDRUMMAG                   = "Thompson Drum";
+TAG_THOMPSON_45ACPBOXMAG                    = "Thompson Drum";
 
-PICKUP_BRONTOBUDDY                     = "You got the Brontornis! It's got a neat bolt rack!";
-PICKUP_KHLEB                           = "It's Khleb-bering time!";
-PICKUP_REAPER                          = "You got the Reaper Automatic Shotgun!";
-PICKUP_REAPER_GL                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Grenade Launcher!";
-PICKUP_REAPER_ZM                       = "You got the Reaper Automatic Shotgun! This one has an underbarrel Carbine!";
-PICKUP_THOMPSON                        = "You got the Thompson SMG! Rata-tat-tat!";
-PICKUP_THOMPSON_NINEMIL                = "You got the Thompson SMG! This one's a reproduction...";
+PICKUP_BRONTOBUDDY                          = "You got the Brontornis! It's got a neat bolt rack!";
+PICKUP_KHLEB                                = "It's Khleb-bering time!";
+PICKUP_REAPER                               = "You got the Reaper Automatic Shotgun!";
+PICKUP_REAPER_GL                            = "You got the Reaper Automatic Shotgun! This one has an underbarrel Grenade Launcher!";
+PICKUP_REAPER_ZM                            = "You got the Reaper Automatic Shotgun! This one has an underbarrel Carbine!";
+PICKUP_THOMPSON                             = "You got the Thompson SMG! Rata-tat-tat!";
+PICKUP_THOMPSON_NINEMIL                     = "You got the Thompson SMG! This one's a reproduction...";
 
-PICKUP_REAPER_MAG                      = "Picked up a 12 Gauge Magazine.";
-PICKUP_REAPER_DRUMMAG                  = "Picked up a 12 Gauge Drum Magazine.";
-PICKUP_THOMPSON_DRUMMAG                = "Picked up a 9mm Drum magazine.";
-PICKUP_THOMPSON_45ACPDRUMMAG           = "Picked up a .45 ACP Drum magazine.";
-PICKUP_THOMPSON_45ACPBOXMAG            = "Picked up a .45 ACP magazine.";
+PICKUP_REAPER_MAG                           = "Picked up a 12 Gauge Magazine.";
+PICKUP_REAPER_DRUMMAG                       = "Picked up a 12 Gauge Drum Magazine.";
+PICKUP_THOMPSON_DRUMMAG                     = "Picked up a 9mm Drum magazine.";
+PICKUP_THOMPSON_45ACPDRUMMAG                = "Picked up a .45 ACP Drum magazine.";
+PICKUP_THOMPSON_45ACPBOXMAG                 = "Picked up a .45 ACP magazine.";
 
-OB_KHLEB                               = "%k pyhiscally removed a chunk of %o and threw that s#&! on the floor";
-OB_REAPER                              = "%k called a %o harvest.";
-OB_THOMPSON                            = "%o found out what was in %k's violin case.";
+OB_KHLEB                                    = "%k pyhiscally removed a chunk of %o and threw that s#&! on the floor";
+OB_REAPER                                   = "%k called a %o harvest.";
+OB_THOMPSON                                 = "%o found out what was in %k's violin case.";
 
 // Menu Labels
 
 // Options Menu Titles
-RRRR_MENU                              = "\c[Fire]Ⓡ\c- RightInfinity's Revolting Revolutionary Rweapons";
-MENU_SHOTGUNS_TITLE                    = "--- Shotguns ---";
-MENU_MACHINEGUNS_TITLE                 = "--- Machine Guns ---";
-MENU_RIFLES_TITLE                      = "--- Rifles ---";
-MENU_RESETOPTIONS_TITLE                = "--- Reset Options ---";
+RRRR_MENU                                   = "\c[Fire]Ⓡ\c- RightInfinity's Revolting Revolutionary Rweapons";
+MENU_SHOTGUNS_TITLE                         = "--- Shotguns ---";
+MENU_MACHINEGUNS_TITLE                      = "--- Machine Guns ---";
+MENU_RIFLES_TITLE                           = "--- Rifles ---";
+MENU_RESETOPTIONS_TITLE                     = "--- Reset Options ---";
 
 // Menu Section Headers
-MENU_SPAWNOPTIONS                      = "Spawn Options";
-MENU_WEPSPAWNOPTIONS                   = "Weapon Spawn Options";
-MENU_MAGSPAWNOPTIONS                   = "Magazine Spawn Options";
-MENU_PERSISTENCYOPTIONS                = "Spawn Persistence Options";
-MENU_RESETOPTIONS                      = "Reset Options";
-MENU_RESETALLOPTIONS                   = "Reset all Options";
+MENU_SPAWNOPTIONS                           = "Spawn Options";
+MENU_WEPSPAWNOPTIONS                        = "Weapon Spawn Options";
+MENU_MAGSPAWNOPTIONS                        = "Magazine Spawn Options";
+MENU_PERSISTENCYOPTIONS                     = "Spawn Persistence Options";
+MENU_RESETOPTIONS                           = "Reset Options";
+MENU_RESETALLOPTIONS                        = "Reset all Options";
 
 // Menu Static Text
-MENU_SPAWNRATE_TEXT1                   = "Setting 'spawn rate' to Replace All will suppress";
-MENU_SPAWNRATE_TEXT2                   = "spawns of that given type.";
-MENU_PERSISTENCY_TEXT                  = "Control whether replacements happen after a mapload:";
+MENU_SPAWNRATE_TEXT1                        = "Setting 'spawn rate' to Replace All will suppress";
+MENU_SPAWNRATE_TEXT2                        = "spawns of that given type.";
+MENU_PERSISTENCY_TEXT                       = "Control whether replacements happen after a mapload:";
 
 // Menu Option Labels
-MENU_NOTICE                            = "Notice:";
-MENU_BACKPACKSALLOWED                  = "Allowed in Ammo Boxes and/or Backpacks: ";
-MENU_SPAWNRATE                         = "Spawn Rate: ";
-MENU_WEPSPAWNRATE                      = "Weapon Spawn Rate: ";
-MENU_MAGSPAWNRATE                      = "Magazine Spawn Rate: ";
-MENU_PERSISTENCY                       = "Persistent Spawns: ";
-MENU_WEPPERSISTENCY                    = "Persistent Weapon Spawns: ";
-MENU_MAGPERSISTENCY                    = "Persistent Magazine Spawns: ";
+MENU_NOTICE                                 = "Notice:";
+MENU_BACKPACKSALLOWED                       = "Allowed in Ammo Boxes and/or Backpacks: ";
+MENU_SPAWNRATE                              = "Spawn Rate: ";
+MENU_WEPSPAWNRATE                           = "Weapon Spawn Rate: ";
+MENU_MAGSPAWNRATE                           = "Magazine Spawn Rate: ";
+MENU_PERSISTENCY                            = "Persistent Spawns: ";
+MENU_WEPPERSISTENCY                         = "Persistent Weapon Spawns: ";
+MENU_MAGPERSISTENCY                         = "Persistent Magazine Spawns: ";
 
 // Menu Option Values
-MENU_ENABLED                           = "Enabled";
-MENU_DISABLED                          = "Disabled";
-MENU_REPLACEALL                        = "Replace All";
-MENU_WITHALL                           = "With All";
+MENU_ENABLED                                = "Enabled";
+MENU_DISABLED                               = "Disabled";
+MENU_REPLACEALL                             = "Replace All";
+MENU_WITHALL                                = "With All";
 
 // Menu Command Text
-MENU_RESETWEP                          = "Reset Weapon Options";
-MENU_RESETMAG                          = "Reset Magazine Options";
-MENU_RESETPERSISTENCY                  = "Reset Persistence Options";
-RRRR_RESETALLOPTIONS                   = "Reset all options for RightInfinity's Revolting Revolutionary Rweapons";
+MENU_RESETWEP                               = "Reset Weapon Options";
+MENU_RESETMAG                               = "Reset Magazine Options";
+MENU_RESETPERSISTENCY                       = "Reset Persistence Options";
+RRRR_RESETALLOPTIONS                        = "Reset all options for RightInfinity's Revolting Revolutionary Rweapons";
 
 // Khleb Options Text
-MENU_KHLEB_TITLE                       = "------ Khleb Options ------";
-MENU_KHLEB_SPAWNTEXT                   = "Control the spawn rate of the Khleb on Hunter Shotguns:";
-MENU_KHLEB_BACKPACKS                   = "Control whether the Khleb spawns in Backpacks:";
-
-// Frontiersman Options Text
-MENU_FRONTIERSMAN_TITLE                = "------ 'Frontiersman' 7.76mm Lever-Action Rifle Options ------";
-MENU_FRONTIERSMAN_HUNTER_SPAWNTEXT     = "Control the spawn rate of the Frontiersman on Hunter Shotguns:";
-MENU_FRONTIERSMAN_SLAYER_SPAWNTEXT     = "Control the spawn rate of the Frontiersman on Slayer Shotguns:";
-MENU_FRONTIERSMAN_BACKPACKS            = "Control whether the Frontiersman spawns in Backpacks:";
-
-// GFB-9 Options Text
-MENU_GFB9_TITLE                        = "------ Gretchenfrage Blaster Mk. 9 Options ------";
-MENU_GFB9_PISTOL_SPAWNTEXT             = "Control the spawn rate of the GFB-9 on Pistols:";
-MENU_GFB9_CLIPBOX_SPAWNTEXT            = "Control the spawn rate of the GFB-9 on Clip Boxes:";
-MENU_GFB9_BACKPACKS                    = "Control whether the GFB-9 spawns in Backpacks:";
+MENU_KHLEB_TITLE                            = "------ Khleb Options ------";
+MENU_KHLEB_SPAWNTEXT                        = "Control the spawn rate of the Khleb on Hunter Shotguns:";
+MENU_KHLEB_BACKPACKS                        = "Control whether the Khleb spawns in Backpacks:";
 
 // Bronto-Buddy Options Text
-MENU_BRONTOBUDDY_TITLE                 = "------ Bronto-Buddy Options ------";
-MENU_BRONTOBUDDY_SPAWNTEXT             = "Control the spawn rate of the Bronto-Buddy on Brontornis:";
-MENU_BRONTOBUDDY_BACKPACKS             = "Control whether the Bronto-Buddy spawns in Backpacks:";
+MENU_BRONTOBUDDY_TITLE                      = "------ Bronto-Buddy Options ------";
+MENU_BRONTOBUDDY_SPAWNTEXT                  = "Control the spawn rate of the Bronto-Buddy on Brontornis:";
+MENU_BRONTOBUDDY_BACKPACKS                  = "Control whether the Bronto-Buddy spawns in Backpacks:";
 
 // Reaper Options Text
-MENU_REAPER_TITLE                      = "------ Reaper Options ------";
-MENU_REAPER_HUNTER_SPAWNTEXT           = "Control the spawn rate of the Reaper on Hunter Shotguns:";
-MENU_REAPER_SLAYER_SPAWNTEXT           = "Control the spawn rate of the Reaper on Slayer Shotguns:";
-MENU_REAPER_BACKPACKS                  = "Control whether the Reaper spawns in Backpacks:";
+MENU_REAPER_TITLE                           = "------ Reaper Options ------";
+MENU_REAPER_HUNTER_SPAWNTEXT                = "Control the spawn rate of the Reaper on Hunter Shotguns:";
+MENU_REAPER_SLAYER_SPAWNTEXT                = "Control the spawn rate of the Reaper on Slayer Shotguns:";
+MENU_REAPER_BACKPACKS                       = "Control whether the Reaper spawns in Backpacks:";
 
-MENU_REAPERMAG_SHELLBOX_SPAWNTEXT      = "Control the spawn rate of Reaper Shell Magazines on Shell Box Pickups:";
-MENU_REAPERMAG_BACKPACKS               = "Control whether Reaper Shell Magazines spawn in Backpacks:";
+MENU_REAPERMAG_SHELLBOX_SPAWNTEXT           = "Control the spawn rate of Reaper Shell Magazines on Shell Box Pickups:";
+MENU_REAPERMAG_BACKPACKS                    = "Control whether Reaper Shell Magazines spawn in Backpacks:";
 
-MENU_REAPERDRUMMAG_SHELLBOX_SPAWNTEXT  = "Control the spawn rate of Reaper Shell Drum Magazines on Shell Box Pickups:";
-MENU_REAPERDRUMMAG_BACKPACKS           = "Control whether Reaper Shell Drum Magazines spawn in Backpacks:";
+MENU_REAPERDRUMMAG_SHELLBOX_SPAWNTEXT       = "Control the spawn rate of Reaper Shell Drum Magazines on Shell Box Pickups:";
+MENU_REAPERDRUMMAG_BACKPACKS                = "Control whether Reaper Shell Drum Magazines spawn in Backpacks:";
 
-MENU_REAPERMAG_PERSISTENCY             = "Persistent Shell Magazine Spawns: ";
-MENU_REAPERDRUMMAG_PERSISTENCY         = "Persistent Shell Drum Magazine Spawns: ";
+MENU_REAPERMAG_PERSISTENCY                  = "Persistent Shell Magazine Spawns: ";
+MENU_REAPERDRUMMAG_PERSISTENCY              = "Persistent Shell Drum Magazine Spawns: ";
 
 // THOMPSON Options Text
-MENU_THOMPSON_TITLE                    = "------ Thompson Options ------";
-MENU_THOMPSON_CHAINGUN_SPAWNTEXT       = "Control the spawn rate of the Thompson on Vulcanettes:";
-MENU_THOMPSON_BACKPACKS                = "Control whether the Thompson spawns in Backpacks:";
+MENU_THOMPSON_TITLE                         = "------ Thompson Options ------";
+MENU_THOMPSON_CHAINGUN_SPAWNTEXT            = "Control the spawn rate of the Thompson on Vulcanettes:";
+MENU_THOMPSON_BACKPACKS                     = "Control whether the Thompson spawns in Backpacks:";
 
-MENU_THOMPSONDRUMMAG_CLIPMAG_SPAWNTEXT = "Control the spawn rate of Thompson Drum Magazines on Clip Magazines:";
-MENU_THOMPSONDRUMMAG_BACKPACKS         = "Control whether Thompson Drum Magazines spawn in Backpacks:";
+MENU_THOMPSONDRUMMAG_CLIPMAG_SPAWNTEXT      = "Control the spawn rate of Thompson 9x22mm Drum Magazines on Clip Magazines:";
+MENU_THOMPSONDRUMMAG_BACKPACKS              = "Control whether Thompson 9x22mm Drum Magazines spawn in Backpacks:";
+
+MENU_THOMPSON45ACPDRUMMAG_CLIPMAG_SPAWNTEXT = "Control the spawn rate of Thompson .45 ACP Drum Magazines on Clip Magazines:";
+MENU_THOMPSON45ACPDRUMMAG_BACKPACKS         = "Control whether Thompson .45 ACP Drum Magazines spawn in Backpacks:";
+
+MENU_THOMPSONBOXMAG_CLIPMAG_SPAWNTEXT       = "Control the spawn rate of Thompson .45 ACP Box Magazines on Clip Magazines:";
+MENU_THOMPSONBOXMAG_BACKPACKS               = "Control whether Thompson .45 ACP Box Magazines spawn in Backpacks:";
