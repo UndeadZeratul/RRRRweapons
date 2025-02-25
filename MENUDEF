@@ -139,13 +139,31 @@ OptionMenu "thompsonSpawning" {
  	StaticText ""
 
 	StaticText "$MENU_MAGSPAWNOPTIONS", "Green"
-    StaticText "$MENU_THOMPSONDRUMMAG_CLIPMAG_SPAWNTEXT", "White"
+    /* StaticText "$MENU_THOMPSONDRUMMAG_CLIPMAG_SPAWNTEXT", "White"
 	ScaleSlider "$MENU_MAGSPAWNRATE", "thompsondrummag_clipmag_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
 	SafeCommand "$MENU_RESETMAG", "resetcvar thompsondrummag_clipmag_spawn_bias"
- 	StaticText ""
+	StaticText ""
 
 	StaticText "$MENU_THOMPSONDRUMMAG_BACKPACKS", "White"
 	Option "$MENU_BACKPACKSALLOWED", "thompsondrummag_allowBackpacks", "OnOff"
+ 	StaticText "" */
+
+    StaticText "$MENU_THOMPSON45ACPDRUMMAG_CLIPMAG_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_MAGSPAWNRATE", "thompson45acpdrummag_clipmag_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETMAG", "resetcvar thompson45acpdrummag_clipmag_spawn_bias"
+ 	StaticText ""
+
+	StaticText "$MENU_THOMPSON45ACPDRUMMAG_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "thompson45acpdrummag_allowBackpacks", "OnOff"
+ 	StaticText ""
+	
+	StaticText "$MENU_THOMPSONBOXMAG_CLIPMAG_SPAWNTEXT", "White"
+	ScaleSlider "$MENU_MAGSPAWNRATE", "thompsonboxmag_clipmag_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	SafeCommand "$MENU_RESETMAG", "resetcvar thompsonboxmag_clipmag_spawn_bias"
+	StaticText ""
+
+	StaticText "$MENU_THOMPSONBOXMAG_BACKPACKS", "White"
+	Option "$MENU_BACKPACKSALLOWED", "thompsonboxmag_allowBackpacks", "OnOff"
  	StaticText ""
 
 	StaticText "$MENU_PERSISTENCYOPTIONS", "Green"
