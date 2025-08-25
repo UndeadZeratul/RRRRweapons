@@ -245,12 +245,12 @@ class RRRRWeaponsHandler : EventHandler {
 
         // Reaper 8-round Magazine
         Array<RRRRSpawnItemEntry> spawns_reapermag;
-        spawns_reapermag.push(addItemEntry('ShellBoxPickup', reapermag_shellbox_spawn_bias));
+        spawns_reapermag.push(addItemEntry('ShellBoxRandom', reapermag_shellbox_spawn_bias));
         addItem('RIReapM8', spawns_reapermag, reapermag_persistent_spawning);
 
         // Reaper 20-round Drum
         Array<RRRRSpawnItemEntry> spawns_reaperdummag;
-        spawns_reaperdummag.push(addItemEntry('ShellBoxPickup', reaperdrummag_shellbox_spawn_bias));
+        spawns_reaperdummag.push(addItemEntry('ShellBoxRandom', reaperdrummag_shellbox_spawn_bias));
         addItem('RIReapD20', spawns_reaperdummag, reaperdrummag_persistent_spawning);
 
         // Thompson 70-round 9mm Drum
