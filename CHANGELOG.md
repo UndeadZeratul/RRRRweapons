@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.0.0] - 2026-06-07
+
 ### Added
 
 -   Added Loadout Code to chamber Thompson in 9mm, now defaults to .45 ACP (#4, #5).
 -   Added HDCoreLib Support (#6).
+-   Added Build Scripts, Changelog, (#7).
 
 ### Changed
 
@@ -22,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Initial Release.  Originally made by RightInfinity, now maintained by the community.
 
-[Unreleased]: https://github.com/HDest-Community/RRRRweapons/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/HDest-Community/RRRRweapons/compare/v2.0.0...HEAD
+
+[v2.0.0]: https://github.com/HDest-Community/RRRRweapons/compare/v1.0.0...v2.0.0
 
 [v1.0.0]: https://github.com/HDest-Community/RRRRweapons/releases/tag/v1.0.0
