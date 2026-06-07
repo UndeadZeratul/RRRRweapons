@@ -2,10 +2,10 @@
 _..Nailed it_
 
 
-_Original Author: RightInfinity  
-Additional Polish by VinceHo/Grim96, Undead_Zeratul_
+_Original Author: RightInfinity_  
+_Additional Polish by VinceHo/Grim96, Undead\_Zeratul_
 
-_Requires [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-Recasted) by the HDest Community._
+_Requires [HDCoreLib](https://github.com/HDest-Community/hdest-core-lib) & [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-Recasted), both made by the HDest Community._
 
 ### Weapons
 
