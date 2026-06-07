@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Added Loadout Code to chamber Thompson in 9mm, now defaults to .45 ACP (#4, #5).
 -   Added HDCoreLib Support (#6).
+-   Added Build Scripts, Changelog, (#7).
 
 ### Changed
 
