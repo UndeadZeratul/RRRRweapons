@@ -345,7 +345,7 @@ class RIReaper : HDWeapon {
 							sb,
 							Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
 							(-30, -22),
-							3,
+							DRAWPREFAB_SN,
 							1.0,
 							sb.DI_SCREEN_CENTER_BOTTOM
 						);
@@ -358,7 +358,7 @@ class RIReaper : HDWeapon {
 							sb,
 							Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
 							(-30, -22),
-							3,
+							DRAWPREFAB_SN,
 							1.0,
 							sb.DI_SCREEN_CENTER_BOTTOM
 						);
@@ -370,7 +370,7 @@ class RIReaper : HDWeapon {
 							sb, 
 							Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
 							(-26, -22),
-							3,
+							DRAWPREFAB_SN,
 							1.0,
 							sb.DI_SCREEN_CENTER_BOTTOM
 						);
@@ -386,7 +386,7 @@ class RIReaper : HDWeapon {
 							sb,
 							Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
 							(-29, -22),
-							3,
+							DRAWPREFAB_SN,
 							1.0,
 							sb.DI_SCREEN_CENTER_BOTTOM
 						);
@@ -399,7 +399,7 @@ class RIReaper : HDWeapon {
 							sb,
 							Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
 							(-29, -22),
-							3,
+							DRAWPREFAB_SN,
 							1.0,
 							sb.DI_SCREEN_CENTER_BOTTOM
 						);
