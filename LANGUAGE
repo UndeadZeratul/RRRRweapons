@@ -30,6 +30,12 @@ OB_KHLEB                                    = "%k pyhiscally removed a chunk of 
 OB_REAPER                                   = "%k called a %o harvest.";
 OB_THOMPSON                                 = "%o found out what was in %k's violin case.";
 
+// Weapon Help
+KLBWH_RELOAD                                = "  Load Shells\n";
+KLBWH_ALTRELOAD                             = "  Load Slugs\n";
+KLBWH_WHENPUMPED                            = "When pumped:	";
+KLBWH_SLUGSHELL                             = " to perform a slug/shell changeover\n";
+
 // Menu Labels
 
 // Options Menu Titles

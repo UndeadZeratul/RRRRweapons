@@ -1,666 +1,974 @@
 // ------------------------------------------------------------
 // A 12-gauge pump for protection
 // ------------------------------------------------------------
-const RILD_KHLEB="KLB";
-class RIKhleb:HDShotgun{
-	default{
+class RIKhleb : HDShotgun {
+	default {
 		//$Category "Weapons/Hideous Destructor"
 		//$Title "Khleb shotgun"
-		//$Sprite "HUNTA0"
+		//$Sprite "KHLEBA0"
 
-		weapon.selectionorder 31;
-		weapon.slotnumber 3;
-		weapon.slotpriority 1;
-		weapon.bobrangex 0.21;
-		weapon.bobrangey 0.86;
-		scale 0.6;
-		inventory.pickupmessage "$PICKUP_KHLEB";
-		hdweapon.barrelsize 30,0.5,2;
-		hdweapon.refid RILD_KHLEB;
 		tag "$TAG_KHLEB";
 		obituary "$OB_KHLEB";
+
+		scale 0.6;
+
+		Inventory.pickupmessage "$PICKUP_KHLEB";
+
+		Weapon.selectionorder 31;
+		Weapon.slotnumber 3;
+		Weapon.slotpriority 1;
+		Weapon.bobrangex 0.21;
+		Weapon.bobrangey 0.86;
+
+		HDWeapon.barrelsize 30, 0.5, 2;
+		HDWeapon.refid "klb";
+		hdweapon.loadoutcodes "
+			\cuslugs - 0/1, loaded with slugs";
 	}
+
+	override string,double getpickupsprite(bool usespare) { return "KLEBA0", 1.0; }
+
 	//returns the power of the load just fired
-	static double Fire(actor caller,int choke=1){
-		double spread=6.;
-		double speedfactor=1.;
-		let hhh=RIKhleb(caller.findinventory("RIKhleb"));
-		if(hhh)choke=hhh.weaponstatus[KHLEBS_CHOKE];
+	static double FireShell(actor caller) {
+		double spread = 6.5;
+		double speedfactor = 1.02857;
 
-		choke=clamp(choke,0,7);
-		spread=6.5-0.5*choke;
-		speedfactor=1.+0.02857*choke;
+		double shotpower = getshotpower();
+		spread *= shotpower;
+		speedfactor *= shotpower;
 
-		double shotpower=getshotpower();
-		spread*=shotpower;
-		speedfactor*=shotpower;
-		HDBulletActor.FireBullet(caller,"HDB_wad");
-		let p=HDBulletActor.FireBullet(caller,"RI_23",
-			spread:spread,speedfactor:speedfactor,amount:12
-		);
-		distantnoise.make(p,"world/shotgunfar");
-		caller.A_StartSound("weapons/hunter",CHAN_WEAPON);
+		HDBulletActor.FireBullet(caller, "HDB_4wad");
+		let p = HDBulletActor.FireBullet(caller, "HDB_400", spread: spread, speedfactor: speedfactor, amount: 12);
+
+		DistantNoise.make(p, "world/shotgunfar");
+		caller.A_StartSound("weapons/khlebShot", CHAN_WEAPON);
+		// caller.A_StartSound("weapons/khlebBlast", 9, CHANF_DEFAULT, 0.1);
+
 		return shotpower;
 	}
-	action void A_FireHunter(){
-		double shotpower=invoker.Fire(self);
-		A_GunFlash();
-		vector2 shotrecoil=(randompick(-2,2),-4.1);
-		shotrecoil*=shotpower;
-		A_MuzzleClimb(0,0,shotrecoil.x,shotrecoil.y,randompick(-1,2)*shotpower,-0.7*shotpower);
-		invoker.weaponstatus[KHLEBS_CHAMBER]=1;
-		invoker.shotpower=shotpower;
+
+	static double FireSlug(actor caller) {
+		double spread = 3.5;
+		double speedfactor = 1.0;
+
+		double shotpower = getshotpower();
+		spread *= shotpower;
+		speedfactor *= shotpower;
+
+		HDBulletActor.FireBullet(caller, "HDB_4wad");
+		let p = HDBulletActor.FireBullet(caller, "HDB_4GS", spread: spread, speedfactor: 1.01);
+		DistantNoise.make(p, "world/shotgunfar");
+		caller.A_StartSound("weapons/khlebShot", CHAN_WEAPON);
+		// caller.A_StartSound("weapons/khlebBlast", 9, CHANF_DEFAULT, 0.1);
+
+		return shotpower;
 	}
 
-	override string,double getpickupsprite(bool usespare){return "HUNT"..getpickupframe(usespare).."0",1.;}
-	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
-		if(sb.hudlevel==1){
-			sb.drawimage("SHL1A0",(-47,-10),basestatusbar.DI_SCREEN_CENTER_BOTTOM);
-			sb.drawnum(hpl.countinv("HDShellAmmo"),-46,-8,
-				basestatusbar.DI_SCREEN_CENTER_BOTTOM
-			);
-		}
-		if(hdw.weaponstatus[KHLEBS_CHAMBER]>1){
-			sb.drawrect(-24,-14,5,3);
-			sb.drawrect(-18,-14,2,3);
-		}
-		else if(hdw.weaponstatus[KHLEBS_CHAMBER]>0){
-			sb.drawrect(-18,-14,2,3);
-		}
-		sb.drawwepnum(hdw.weaponstatus[KHLEBS_TUBE],hdw.weaponstatus[KHLEBS_TUBESIZE],posy:-7);
-		for(int i=hdw.weaponstatus[SHOTS_SIDESADDLE];i>0;i--){
-			sb.drawrect(-16-i*2,-5,1,3);
-		}
+	action void A_FireKhleb() {
+		double shotpower = invoker.weaponStatus[KHLEBS_CHAMBER] == 4 ? invoker.FireSlug(self) : invoker.FireShell(self);
+
+		A_GunFlash();
+
+		Vector2 shotrecoil = (randompick(-1, 1), -3.2) * shotpower;
+		A_ZoomRecoil(0.855);
+		A_MuzzleClimb(
+			0, 0,
+			shotrecoil.x, shotrecoil.y,
+			randompick(-2, 4) * shotpower, -1.3 * shotpower
+		);
+
+		invoker.weaponStatus[KHLEBS_CHAMBER] -= 2;
+		invoker.shotpower = shotpower;
 	}
-	override string gethelptext(){
+
+	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
+
+		if (sb.hudlevel == 1) {
+			sb.drawimage("4GSIA0", (-55, -10), sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HD4GBAmmo"), -54, -8, sb.DI_SCREEN_CENTER_BOTTOM);
+
+			sb.drawimage("4GS1A0",(-65, -10), sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HD4GSAmmo"), -64, -8, sb.DI_SCREEN_CENTER_BOTTOM);
+		}
+
+		int chm = hdw.weaponStatus[KHLEBS_CHAMBER];
+		int tb1 = hdw.weaponStatus[KHLEBS_TB1];
+		int tb2 = hdw.weaponStatus[KHLEBS_TB2];
+		int tb3 = hdw.weaponStatus[KHLEBS_TB3];
+		// int tb4 = hdw.weaponStatus[KHLEBS_TB4];
+		
+		let pos = (-16, -11);
+		
+		// Draw Chambered Round
+		if (chm > 0) {
+
+			if (chm == 4) {
+				HDCore.DrawFancySlug(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (chm == 3) {
+				HDCore.DrawFancyShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (chm == 1) {
+				HDCore.DrawSpentShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			}
+		}
+
+		// Draw Rounds in Tube
+		if (tb1 > 0) {
+			pos = (-16, -7);
+
+			if (tb1 == 4) {
+				HDCore.DrawFancySlug(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb1 == 3) {
+				HDCore.DrawFancyShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb1 == 1) {
+				HDCore.DrawSpentShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			}
+		}
+
+		if (tb2 > 0) {
+			pos = (-25, -7);
+
+			if (tb2 == 4) {
+				HDCore.DrawFancySlug(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb2 == 3) {
+				HDCore.DrawFancyShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb2 == 1) {
+				HDCore.DrawSpentShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			}
+		}
+
+		if (tb3 > 0) {
+			pos = (-34, -7);
+
+			if (tb3 == 4) {
+				HDCore.DrawFancySlug(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb3 == 3) {
+				HDCore.DrawFancyShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			} else if (tb3 == 1) {
+				HDCore.DrawSpentShell(
+					sb,
+					Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+					pos,
+					DRAWPREFAB_EW,
+					1.0,
+					sb.DI_SCREEN_CENTER_BOTTOM
+				);
+			}
+		}
+
+		// if (tb4 > 0) {
+		// 	pos = (-43, -7);
+
+		// 	if (tb4 == 4) {
+		// 		HDCore.DrawFancySlug(
+		// 			sb,
+		// 			Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+		// 			pos,
+		// 			DRAWPREFAB_EW,
+		// 			1.0,
+		// 			sb.DI_SCREEN_CENTER_BOTTOM
+		// 		);
+		// 	} else if (tb4 == 3) {
+		// 		HDCore.DrawFancyShell(
+		// 			sb,
+		// 			Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+		// 			pos,
+		// 			DRAWPREFAB_EW,
+		// 			1.0,
+		// 			sb.DI_SCREEN_CENTER_BOTTOM
+		// 		);
+		// 	} else if (tb4 == 1) {
+		// 		HDCore.DrawSpentShell(
+		// 			sb,
+		// 			Color(255, sb.sbColour.r, sb.sbColour.g, sb.sbColour.b),
+		// 			pos,
+		// 			DRAWPREFAB_EW,
+		// 			1.0,
+		// 			sb.DI_SCREEN_CENTER_BOTTOM
+		// 		);
+		// 	}
+		// }
+	}
+
+	// FIXME: Replace with Khleb Help Text
+	override string gethelptext() {
 		LocalizeHelp();
 		return
-		LWPHELP_FIRE..StringTable.Localize("$SHOOT_CH")..weaponstatus[HUNTS_CHOKE]..")\n"
+		LWPHELP_FIRESHOOT
 		..LWPHELP_ALTFIRE..StringTable.Localize("$PUMP")
-		..LWPHELP_RELOAD..StringTable.Localize("$SHTG_REL1")
-		..LWPHELP_ALTRELOAD..StringTable.Localize("$SHTG_REL2")
-		..LWPHELP_FIREMODE.."+"..LWPHELP_RELOAD..StringTable.Localize("$SHTG_SIDE")
+		..WEPHELP_RELOAD..StringTable.Localize("$KLBWH_RELOAD")
+		..WEPHELP_ALTRELOAD..StringTable.Localize("$KLBWH_ALTRELOAD")
+		..StringTable.Localize("$KLBWH_WHENPUMPED")..WEPHELP_ALTRELOAD.."/"..WEPHELP_RELOAD..StringTable.Localize("$KLBWH_SLUGSHELL")
+		..LWPHELP_MAGMANAGER
 		..LWPHELP_UNLOADUNLOAD
 		;
 	}
+
 	override void DrawSightPicture(
-		HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl,
-		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc
-	){
+		HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl,
+		bool sightbob, Vector2 bob, double fov, bool scopeview, Actor hpc
+	) {
 		int cx,cy,cw,ch;
 		[cx,cy,cw,ch]=screen.GetClipRect();
+
 		sb.SetClipRect(
-			-16+bob.x,-32+bob.y,32,40,
+			-16 + bob.x, -4 + bob.y, 32, 40,
 			sb.DI_SCREEN_CENTER
 		);
-		vector2 bobb=bob*1.1;
+
+		Vector2 bobb = bob * 1.1;
 		sb.drawimage(
-			"frntsite",(0,0)+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+			"frntsite",
+			(0, 0) + bobb,
+			sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
 		);
 		sb.SetClipRect(cx,cy,cw,ch);
 
 		sb.drawimage(
-			"sgbaksit",(0,0)+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
-			alpha:0.9
+			"sgbaksit",
+			(0, 0) + bob,
+			sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+			alpha: 0.9
 		);
 	}
-	override double gunmass(){
-		int tube=weaponstatus[KHLEBS_TUBE];
-		if(tube>4)tube+=(tube-4)*2;
-		return 8+tube*0.3+weaponstatus[SHOTS_SIDESADDLE]*0.08;
+
+	override double gunmass() {
+		return 10;
 	}
-	override double weaponbulk(){
-		return 125+(weaponstatus[SHOTS_SIDESADDLE]+weaponstatus[KHLEBS_TUBE])*ENC_SHELLLOADED;
+
+	override double weaponbulk() {
+		return 125
+			+ ((weaponStatus[KHLEBS_TB1] > 2 ? 1 : 0) * weaponStatus[KHLEBS_TB1] > 3 ? ENC_4GSLOADED : ENC_4GBLOADED)
+			+ ((weaponStatus[KHLEBS_TB2] > 2 ? 1 : 0) * weaponStatus[KHLEBS_TB2] > 3 ? ENC_4GSLOADED : ENC_4GBLOADED)
+			+ ((weaponStatus[KHLEBS_TB3] > 2 ? 1 : 0) * weaponStatus[KHLEBS_TB3] > 3 ? ENC_4GSLOADED : ENC_4GBLOADED)
+			/* + ((weaponStatus[KHLEBS_TB4] > 2 ? 1 : 0) * weaponStatus[KHLEBS_TB4] > 3 ? ENC_4GSLOADED : ENC_4GBLOADED) */;
 	}
-	action void A_SetAltHold(bool which){
-		if(which)invoker.weaponstatus[0]|=KHLEBF_ALTHOLDING;
-		else invoker.weaponstatus[0]&=~KHLEBF_ALTHOLDING;
-	}
-	action void A_Chamber(bool careful=false){
-		int chm=invoker.weaponstatus[KHLEBS_CHAMBER];
-		invoker.weaponstatus[KHLEBS_CHAMBER]=0;
-		if(invoker.weaponstatus[KHLEBS_TUBE]>0){
-			invoker.weaponstatus[KHLEBS_CHAMBER]=2;
-			invoker.weaponstatus[KHLEBS_TUBE]--;
+
+	override void DropOneAmmo(int amt) {
+		if (owner) {
+			amt = clamp(amt, 1, 10);
+			owner.A_DropInventory("HD4GSAmmo", amt * 4);
+			owner.A_DropInventory("HD4GBAmmo", amt * 4);
 		}
-		vector3 cockdir;double cp=cos(pitch);
-		if(careful)cockdir=(-cp,cp,-5);
-		else cockdir=(0,-cp*5,sin(pitch)*frandom(4,6));
-		cockdir.xy=rotatevector(cockdir.xy,angle);
-		bool pocketed=false;
-		if(chm>1){
-			if(careful&&!A_JumpIfInventory("HDShellAmmo",0,"null")){
-				HDF.Give(self,"HDShellAmmo",1);
-				pocketed=true;
+	}
+
+	override void ForceBasicAmmo() {
+		if (weaponStatus[0]&KHLEBF_SLUGLOADOUT) {
+			owner.A_SetInventory("HD4GSAmmo", 4);
+		} else {
+			owner.A_SetInventory("HD4GBAmmo", 4);
+		}
+	}
+
+	override void DetachFromOwner() {
+		if (handshells > 0) {
+			let ammo = (weaponStatus[0]&KHLEBF_SLUG) ? "HD4GSAmmo" : "HD4GBAmmo";
+			
+			if (owner) {
+				owner.A_DropItem(ammo, handshells);
+			} else {
+				A_DropItem(ammo, handshells);
 			}
-		}else if(chm>0){	
-			cockdir*=frandom(1.,1.3);
 		}
 
-		if(
-			!pocketed
-			&&chm>=1
-		){
-			vector3 gunofs=HDMath.RotateVec3D((9,-1,-2),angle,pitch);
-			actor rrr=null;
+		handshells = 0;
+		HDWeapon.detachfromowner();
+	}
 
-			if(chm>1)rrr=spawn("HDFumblingShell",(pos.xy,pos.z+height*0.85)+gunofs+viewpos.offset);
-			else rrr=spawn("HDSpentShell",(pos.xy,pos.z+height*0.85)+gunofs+viewpos.offset);
-
-			rrr.target=self;
-			rrr.angle=angle;
-			rrr.vel=HDMath.RotateVec3D((1,-5,0.2),angle,pitch);
-			if(chm==1)rrr.vel*=1.3;
-			rrr.vel+=vel;
+	action void A_SetAltHold(bool which) {
+		if (which) {
+			invoker.weaponStatus[0] |= KHLEBF_ALTHOLDING;
+		} else {
+			invoker.weaponStatus[0] &= ~KHLEBF_ALTHOLDING;
 		}
 	}
-	action void A_CheckPocketSaddles(){
-		if(invoker.weaponstatus[SHOTS_SIDESADDLE]<1)invoker.weaponstatus[0]|=KHLEBF_FROMPOCKETS;
-		if(!countinv("HDShellAmmo"))invoker.weaponstatus[0]&=~KHLEBF_FROMPOCKETS;
+	action void A_PushKhlebTube() {
+		invoker.weaponStatus[KHLEBS_TB1] = invoker.weaponStatus[KHLEBS_TB2];
+		invoker.weaponStatus[KHLEBS_TB2] = invoker.weaponStatus[KHLEBS_TB3];
+		invoker.weaponStatus[KHLEBS_TB3] = 0; // invoker.weaponStatus[KHLEBS_TB4];
+		// invoker.weaponStatus[KHLEBS_TB4] = 0;
 	}
-	action bool A_LoadTubeFromHand(){
-		int hand=invoker.handshells;
-		if(
+
+	action void A_Chamber(bool careful = false) {
+		int chm = invoker.weaponStatus[KHLEBS_CHAMBER];
+		invoker.weaponStatus[KHLEBS_CHAMBER] = invoker.weaponStatus[KHLEBS_TB1];
+
+		A_PushKhlebTube();
+
+		Vector3 cockdir;
+		double cp = cos(pitch);
+
+		if (careful) {
+			cockdir = (-cp, cp, -5);
+		} else {
+			cockdir = (0, -cp * 5, sin(pitch) * frandom(4, 6));
+		}
+
+		cockdir.xy = RotateVector(cockdir.xy, angle);
+
+		bool pocketed = false;
+		if ( chm > 2) {
+			if (careful && !A_JumpIfInventory(chm == 4 ? "HD4GSAmmo" : "HD4GBAmmo", 0, "null")) {
+				HDF.Give(self, "HD4GBAmmo", 1);
+				pocketed = true;
+			}
+		} else if (chm > 0) {	
+			cockdir *= frandom(1.0, 1.3);
+		}
+
+		if (!pocketed && chm >= 1) {
+			Vector3 gunofs = HDMath.RotateVec3D((9, -1, -2), angle, pitch);
+			Actor rrr = null;
+
+			if (chm > 2) {
+				rrr = spawn(chm == 4 ? "HDFumbling4GS" : "HDFumbling4GB", (pos.xy, pos.z + height * 0.85) + gunofs + viewpos.offset);
+			} else {
+				rrr = spawn(chm == 2 ? "HDSpent4GS" : "HDSpent4GBb", (pos.xy, pos.z + height * 0.85) + gunofs + viewpos.offset);
+			}
+
+			rrr.target = self;
+			rrr.angle = angle;
+			rrr.vel = HDMath.RotateVec3D((1, -5, 0.2), angle, pitch);
+
+			if (chm == 1) rrr.vel *= 1.3;
+
+			rrr.vel += vel;
+		}
+	}
+
+	action bool A_LoadTubeFromHand() {
+		bool slg = invoker.weaponStatus[0]&KHLEBF_SLUG;
+		int hand = invoker.handshells;
+		if (
 			!hand
-			||(
-				invoker.weaponstatus[KHLEBS_CHAMBER]>0
-				&&invoker.weaponstatus[KHLEBS_TUBE]>=invoker.weaponstatus[KHLEBS_TUBESIZE]
+			|| (
+				invoker.weaponStatus[KHLEBS_CHAMBER] > 0
+				&& invoker.weaponStatus[KHLEBS_TB1] > 0
+				&& invoker.weaponStatus[KHLEBS_TB2] > 0
+				&& invoker.weaponStatus[KHLEBS_TB3] > 0
+				// && invoker.weaponStatus[KHLEBS_TB4] > 0
 			)
-		){
+		) {
 			EmptyHand();
 			return false;
 		}
-		invoker.weaponstatus[KHLEBS_TUBE]++;
+		// invoker.weaponStatus[KHLEBS_TB4] = invoker.weaponStatus[KHLEBS_TB3];
+		invoker.weaponStatus[KHLEBS_TB3] = invoker.weaponStatus[KHLEBS_TB2];
+		invoker.weaponStatus[KHLEBS_TB2] = invoker.weaponStatus[KHLEBS_TB1];
+		invoker.weaponStatus[KHLEBS_TB1] = slg ? 4 : 3;
 		invoker.handshells--;
-		A_StartSound("weapons/huntreload",8,CHANF_OVERLAP);
+		A_StartSound("weapons/khlebReload", 8, CHANF_OVERLAP);
 		return true;
 	}
-	action bool A_GrabShells(int maxhand=2,bool settics=false,bool alwaysone=false){
-		if(maxhand>0)EmptyHand();else maxhand=abs(maxhand);
-		bool fromsidesaddles=!(invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS);
-		int toload=min(
-			fromsidesaddles?invoker.weaponstatus[SHOTS_SIDESADDLE]:countinv("HDShellAmmo"),
-			alwaysone?1:(invoker.weaponstatus[KHLEBS_TUBESIZE]-invoker.weaponstatus[KHLEBS_TUBE]),
+
+	action bool A_GrabShells(int maxhand = 2, bool settics = false, bool alwaysone = false) {
+		bool slg = invoker.weaponStatus[0]&KHLEBF_SLUG;
+
+		if (maxhand > 0) {
+			EmptyHand();
+		} else {
+			maxhand = abs(maxhand);
+		}
+
+		int toload = min(
+			slg ? countinv("HD4GSAmmo") : countinv("HD4GBAmmo"),
+			1,
+			max(1, health / 22),
 			maxhand
 		);
-		if(toload<1)return false;
-		invoker.handshells=toload;
-		if(fromsidesaddles){
-			invoker.weaponstatus[SHOTS_SIDESADDLE]-=toload;
-			if(settics)A_SetTics(2);
-			A_StartSound("weapons/pocket",8,CHANF_OVERLAP,0.4);
-			A_MuzzleClimb(
-				frandom(0.1,0.15),frandom(0.05,0.08),
-				frandom(0.1,0.15),frandom(0.05,0.08)
-			);
-		}else{
-			A_TakeInventory("HDShellAmmo",toload,TIF_NOTAKEINFINITE);
-			if(settics)A_SetTics(7);
-			A_StartSound("weapons/pocket",9);
-			A_MuzzleClimb(
-				frandom(0.1,0.15),frandom(0.2,0.4),
-				frandom(0.2,0.25),frandom(0.3,0.4),
-				frandom(0.1,0.35),frandom(0.3,0.4),
-				frandom(0.1,0.15),frandom(0.2,0.4)
-			);
-		}
+
+		if (toload < 1) return false;
+
+		invoker.handshells = toload;
+		A_TakeInventory(slg ? "HD4GSAmmo" : "HD4GBAmmo", toload, TIF_NOTAKEINFINITE);
+
+		if (settics) A_SetTics(7);
+
+		A_StartSound("weapons/pocket",9);
+		A_MuzzleClimb(
+			frandom(0.1, 0.15), frandom(0.2, 0.4),
+			frandom(0.2, 0.25), frandom(0.3, 0.4),
+			frandom(0.1, 0.35), frandom(0.3, 0.4),
+			frandom(0.1, 0.15), frandom(0.2, 0.4)
+		);
+
 		return true;
 	}
-	states{
-	select0:
-		SHTG A 0;
-		goto select0big;
-	deselect0:
-		SHTG A 0;
-		goto deselect0big;
-	firemode:
-		SHTG A 0;
-	firemodehold:
-		---- A 1{
-			if(pressingreload()){
-				setweaponstate("reloadss");
-			}else A_WeaponReady(WRF_NONE);
-		}
-		---- A 0 A_JumpIf(pressingfiremode()&&invoker.weaponstatus[SHOTS_SIDESADDLE]<12,"firemodehold");
-		goto nope;
-	ready:
-		SHTG A 0 A_JumpIf(pressingunload()&&(pressinguse()||pressingzoom()),"cannibalize");
-		SHTG A 0 A_JumpIf(pressingaltfire(),2);
-		SHTG A 0{
-			if(!pressingaltfire()){
-				if(!pressingfire())A_ClearRefire();
-				A_SetAltHold(false);
+
+	action void EmptyHand(int amt = -1, bool careful = false) {
+		if (!amt) return;
+
+		if(amt > 0) invoker.handshells = amt;
+
+		while (invoker.handshells > 0) {
+			let slug = invoker.weaponStatus[0]&KHLEBF_SLUG;
+			let ammo = slug ? "HD4GSAmmo" : "HD4GBAmmo";
+
+			if (careful && !A_JumpIfInventory(ammo, 0, "null")) {
+				invoker.handshells--;
+				HDF.Give(self, ammo, 1);
+ 			} else if(invoker.handshells >= 3) {
+				invoker.handshells -= 3;
+
+				A_SpawnItemEx(
+					slug ? "HD4GSAmmo" : "HD4GBAmmo",
+					// slug ? "HDFumbled4GS" : "HDFumbled4GB",
+					cos(pitch) * 1, 1, height - 7 - sin(pitch) * 1,
+					cos(pitch) * cos(angle) * frandom(1, 2) + vel.x,
+					cos(pitch) * sin(angle) * frandom(1, 2) + vel.y,
+					-sin(pitch) + vel.z,
+					0,
+					SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+				);
+			} else {
+				invoker.handshells--;
+				A_SpawnItemEx(slug ? "HDFumbling4GS" : "HDFumbling4GB",
+					cos(pitch) * 5, 1, height - 7 - sin(pitch) * 5,
+					cos(pitch) * cos(angle) * frandom(1, 4) + vel.x,
+					cos(pitch) * sin(angle) * frandom(1, 4) + vel.y,
+					-sin(pitch) * random(1, 4) + vel.z,
+					0,
+					SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+				);
 			}
 		}
-		SHTG A 1 A_WeaponReady(WRF_ALL);
-		goto readyend;
-	reloadSS:
-		SHTG A 1 offset(1,34);
-		SHTG A 2 offset(2,34);
-		SHTG A 3 offset(3,36);
-	reloadSSrestart:
-		SHTG A 6 offset(3,35);
-		SHTG A 9 offset(4,34);
-		SHTG A 4 offset(3,34){
-			int hnd=min(
-				countinv("HDShellAmmo"),
-				12-invoker.weaponstatus[SHOTS_SIDESADDLE],
-				3
-			);
-			if(hnd<1)setweaponstate("reloadSSend");
-			else{
-				A_TakeInventory("HDShellAmmo",hnd);
-				invoker.weaponstatus[SHOTS_SIDESADDLE]+=hnd;
-				A_StartSound("weapons/pocket",8);
-			}
-		}
-		SHTG A 0 {
-			if(
-				!PressingReload()
-				&&!PressingAltReload()
-			)setweaponstate("reloadSSend");
-			else if(
-				invoker.weaponstatus[SHOTS_SIDESADDLE]<12
-				&&countinv("HDShellAmmo")
-			)setweaponstate("ReloadSSrestart");
-		}
-	reloadSSend:
-		SHTG A 3 offset(2,34);
-		SHTG A 1 offset(1,34) EmptyHand(careful:true);
-		goto nope;
-	hold:
-		SHTG A 0{
-			bool paf=pressingaltfire();
-			if(
-				paf&&!(invoker.weaponstatus[0]&KHLEBF_ALTHOLDING)
-			)setweaponstate("chamber");
-			else if(!paf)invoker.weaponstatus[0]&=~KHLEBF_ALTHOLDING;
-		}
-		SHTG A 1 A_WeaponReady(WRF_NONE);
-		SHTG A 0 A_Refire();
-		goto ready;
-	fire:
-		SHTG A 0 A_JumpIf(invoker.weaponstatus[KHLEBS_CHAMBER]==2,"shoot");
-		SHTG A 1 A_WeaponReady(WRF_NONE);
-		SHTG A 0 A_Refire();
-		goto ready;
-	shoot:
-		SHTG A 2;
-		SHTG A 1 offset(0,36) A_FireHunter();
-		SHTG E 1;
-		goto ready;
-	altfire:
-	chamber:
-		SHTG A 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_ALTHOLDING,"nope");
-		SHTG A 0 A_SetAltHold(true);
-		SHTG A 1 A_StartSound("weapons/huntrackbak",8);
-		SHTG AE 2 A_MuzzleClimb(0,frandom(0.6,1.));
-		SHTG E 2 A_JumpIf(pressingaltfire(),"longstroke");
-		SHTG EA 2 A_MuzzleClimb(0,-frandom(0.6,1.));
-		SHTG E 0 A_StartSound("weapons/huntshort",8);
-		SHTG E 0 A_Refire("ready");
-		goto ready;
-	longstroke:
-		SHTG F 2 A_MuzzleClimb(frandom(1.,2.));
-		SHTG F 0{
-			A_Chamber();
-			A_MuzzleClimb(-frandom(1.,2.));
-		}
-	racked:
-		SHTG F 1 A_WeaponReady(WRF_NOFIRE);
-		SHTG F 0 A_JumpIf(!pressingaltfire(),"unrack");
-		SHTG F 0 A_JumpIf(pressingunload(),"rackunload");
-		SHTG F 0 A_JumpIf(invoker.weaponstatus[KHLEBS_CHAMBER],"racked");
-		SHTG F 0{
-			int rld=0;
-			if(pressingreload()){
-				rld=1;
-				if(invoker.weaponstatus[SHOTS_SIDESADDLE]>0)
-				invoker.weaponstatus[0]&=~KHLEBF_FROMPOCKETS;
-				else{
-					invoker.weaponstatus[0]|=KHLEBF_FROMPOCKETS;
-					rld=2;
+	}
+
+	states {
+		select0:
+			KLBG A 0;
+			goto select0big;
+		deselect0:
+			KLBG A 0;
+			goto deselect0big;
+		ready:
+			KLBG A 0 A_JumpIf(pressingAltFire(), 2);
+			KLBG A 0 {
+				if (!pressingAltFire()) {
+					if (!pressingFire()) A_ClearRefire();
+
+					A_SetAltHold(false);
 				}
-			}else if(pressingaltreload()){
-				rld=2;
-				invoker.weaponstatus[0]|=KHLEBF_FROMPOCKETS;
 			}
-			if(
-				(rld==2&&countinv("HDShellAmmo"))
-				||(rld==1&&invoker.weaponstatus[SHOTS_SIDESADDLE]>0)
-			)setweaponstate("rackreload");
-		}
-		loop;
-	rackreload:
-		SHTG F 1 offset(-1,35) A_WeaponBusy(true);
-		SHTG F 2 offset(-2,37);
-		SHTG F 4 offset(-3,40);
-		SHTG F 1 offset(-4,42) A_GrabShells(1,true,true);
-		SHTG F 0 A_JumpIf(!(invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS),"rackloadone");
-		SHTG F 6 offset(-5,43);
-		SHTG F 6 offset(-4,41) A_StartSound("weapons/pocket",9);
-	rackloadone:
-		SHTG F 1 offset(-4,42);
-		SHTG F 2 offset(-4,41);
-		SHTG F 3 offset(-4,40){
-			A_StartSound("weapons/huntreload",8,CHANF_OVERLAP);
-			invoker.weaponstatus[KHLEBS_CHAMBER]=2;
-			invoker.handshells--;
-			EmptyHand(careful:true);
-		}
-		SHTG F 5 offset(-4,41);
-		SHTG F 4 offset(-4,40) A_JumpIf(invoker.handshells>0,"rackloadone");
-		goto rackreloadend;
-	rackreloadend:
-		SHTG F 1 offset(-3,39);
-		SHTG F 1 offset(-2,37);
-		SHTG F 1 offset(-1,34);
-		SHTG F 0 A_WeaponBusy(false);
-		goto racked;
-
-	rackunload:
-		SHTG F 1 offset(-1,35) A_WeaponBusy(true);
-		SHTG F 2 offset(-2,37);
-		SHTG F 4 offset(-3,40);
-		SHTG F 1 offset(-4,42);
-		SHTG F 2 offset(-4,41);
-		SHTG F 3 offset(-4,40){
-			int chm=invoker.weaponstatus[KHLEBS_CHAMBER];
-			invoker.weaponstatus[KHLEBS_CHAMBER]=0;
-			if(chm==2){
-				invoker.handshells++;
-				EmptyHand(careful:true);
-			}else if(chm==1)A_SpawnItemEx("HDSpentShell",
-				cos(pitch)*8,0,height-7-sin(pitch)*8,
-				vel.x+cos(pitch)*cos(angle-random(86,90))*5,
-				vel.y+cos(pitch)*sin(angle-random(86,90))*5,
-				vel.z+sin(pitch)*random(4,6),
-				0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-			);
-			if(chm)A_StartSound("weapons/huntreload",8,CHANF_OVERLAP);
-		}
-		SHTG F 5 offset(-4,41);
-		SHTG F 4 offset(-4,40) A_JumpIf(invoker.handshells>0,"rackloadone");
-		goto rackreloadend;
-
-	unrack:
-		SHTG F 0 A_StartSound("weapons/huntrackfwd",8);
-		SHTG E 2 A_JumpIf(!pressingfire(),1);
-		SHTG EA 2{
-			if(pressingfire())A_SetTics(1);
-			A_MuzzleClimb(0,-frandom(0.6,1.));
-		}
-		SHTG A 0 A_ClearRefire();
-		goto ready;
-	// playsgco:
-	// 	TNT1 A 8 A_StartSound("weapons/huntrackup",8);
-	// 	TNT1 A 0 A_StopSound(8);
-	// 	stop;
-	// playsgco2:
-	// 	TNT1 A 8 A_StartSound("weapons/huntrackdown",8);
-	// 	TNT1 A 0 A_StopSound(8);
-	// 	stop;
-	flash:
-		SHTF B 1 bright{
-			A_Light2();
-			HDFlashAlpha(-32);
-		}
-		TNT1 A 1 A_ZoomRecoil(0.9);
-		TNT1 A 0 A_Light0();
-		TNT1 A 0 A_AlertMonsters();
-		stop;
-	altreload:
-	reloadfrompockets:
-		SHTG A 0{
-			if(!countinv("HDShellAmmo"))setweaponstate("nope");
-			else invoker.weaponstatus[0]|=KHLEBF_FROMPOCKETS;
-		}goto startreload;
-	reload:
-	reloadfromsidesaddles:
-		SHTG A 0{
-			int sss=invoker.weaponstatus[SHOTS_SIDESADDLE];
-			int ppp=countinv("HDShellAmmo");
-			if(ppp<1&&sss<1)setweaponstate("nope");
-				else if(sss<1)
-					invoker.weaponstatus[0]|=KHLEBF_FROMPOCKETS;
-				else invoker.weaponstatus[0]&=~KHLEBF_FROMPOCKETS;
-		}goto startreload;
-	startreload:
-		SHTG A 1{
-			if(
-				invoker.weaponstatus[KHLEBS_TUBE]>=invoker.weaponstatus[KHLEBS_TUBESIZE]
-			){
-				if(
-					invoker.weaponstatus[SHOTS_SIDESADDLE]<12
-					&&countinv("HDShellAmmo")
-				)setweaponstate("ReloadSS");
-				else setweaponstate("nope");
+			KLBG A 1 A_WeaponReady(WRF_ALL);
+			KLBG A 0 {
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
 			}
-		}
-		SHTG AG 4 A_MuzzleClimb(frandom(.6,.7),-frandom(.6,.7));
-	reloadstarthand:
-		SHTG H 1 offset(0,36);
-		SHTG H 1 offset(0,38);
-		SHTG H 2 offset(0,36);
-		SHTG H 2 offset(0,34);
-		SHTG H 3 offset(0,36);
-		SHTG H 3 offset(0,40) A_CheckPocketSaddles();
-		SHTG H 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS,"reloadpocket");
-	reloadfast:
-		SHTG H 4 offset(0,40) A_GrabShells(3,false);
-		SHTG H 3 offset(0,42) A_StartSound("weapons/pocket",9,volume:0.4);
-		SHTG H 3 offset(0,41);
-		goto reloadashell;
-	reloadpocket:
-		SHTG H 4 offset(0,39) A_GrabShells(3,false);
-		// SHTG H 6 offset(0,40) A_JumpIf(health>40,1);
-		SHTG H 4 offset(0,40) A_StartSound("weapons/pocket",9);
-		SHTG H 8 offset(0,42) A_StartSound("weapons/pocket",9);
-		SHTG H 6 offset(0,41) A_StartSound("weapons/pocket",9);
-		SHTG H 6 offset(0,40);
-		goto reloadashell;
-	reloadashell:
-		SHTG H 2 offset(0,36);
-		SHTG H 4 offset(0,34)A_LoadTubeFromHand();
-		SHTG HHHHHH 1 offset(0,33){
-			if(
-				PressingReload()
-				||PressingAltReload()
-				||PressingUnload()
-				||PressingFire()
-				||PressingAltfire()
-				||PressingZoom()
-				||PressingFiremode()
-			)invoker.weaponstatus[0]|=KHLEBF_HOLDING;
-			else invoker.weaponstatus[0]&=~KHLEBF_HOLDING;
-
-			if(
-				invoker.weaponstatus[KHLEBS_TUBE]>=invoker.weaponstatus[KHLEBS_TUBESIZE]
-				||(
-					invoker.handshells<1&&(
-						invoker.weaponstatus[0]&KHLEBF_FROMPOCKETS
-						||invoker.weaponstatus[SHOTS_SIDESADDLE]<1
-					)&&
-					!countinv("HDShellAmmo")
-				)
-			)setweaponstate("reloadend");
-			else if(
-				!pressingaltreload()
-				&&!pressingreload()
-			)setweaponstate("reloadend");
-			else if(invoker.handshells<1)setweaponstate("reloadstarthand");
-		}goto reloadashell;
-	reloadend:
-		SHTG H 4 offset(0,34) A_StartSound("weapons/huntopen",8);
-		SHTG H 1 offset(0,36) EmptyHand(careful:true);
-		SHTG H 1 offset(0,34);
-		SHTG HGA 3;
-		SHTG A 0 A_JumpIf(invoker.weaponstatus[0]&KHLEBF_HOLDING,"nope");
-		goto ready;
-
-	cannibalize:
-		SHTG A 2 offset(0,36) A_JumpIf(!countinv("Slayer"),"nope");
-		SHTG A 2 offset(0,40) A_StartSound("weapons/pocket",9);
-		SHTG A 6 offset(0,42);
-		SHTG A 4 offset(0,44);
-		SHTG A 6 offset(0,42);
-		SHTG A 2 offset (0,36) A_CannibalizeOtherShotgun();
-		goto ready;
-
-	unloadSS:
-		SHTG A 2 offset(1,34) A_JumpIf(invoker.weaponstatus[SHOTS_SIDESADDLE]<1,"nope");
-		SHTG A 1 offset(2,34);
-		SHTG A 1 offset(3,36);
-	unloadSSLoop1:
-		SHTG A 4 offset(4,36);
-		SHTG A 2 offset(5,37) A_UnloadSideSaddle();
-		SHTG A 3 offset(4,36){	//decide whether to loop
-			if(
-				PressingReload()
-				||PressingFire()
-				||PressingAltfire()
-				||invoker.weaponstatus[SHOTS_SIDESADDLE]<1
-			)setweaponstate("unloadSSend");
-		}goto unloadSSLoop1;
-	unloadSSend:
-		SHTG A 3 offset(4,35);
-		SHTG A 2 offset(3,35);
-		SHTG A 1 offset(2,34);
-		SHTG A 1 offset(1,34);
-		goto nope;
-	unload:
-		SHTG A 1{
-			if(
-				invoker.weaponstatus[SHOTS_SIDESADDLE]>0
-				&&!(player.cmd.buttons&BT_USE)
-			)setweaponstate("unloadSS");
-			else if(
-				invoker.weaponstatus[KHLEBS_CHAMBER]<1
-				&&invoker.weaponstatus[KHLEBS_TUBE]<1
-			)setweaponstate("nope");
-		}
-		SHTG GG 4 A_MuzzleClimb(frandom(1.2,2.4),-frandom(1.2,2.4));
-		SHTG H 1 offset(0,34);
-		SHTG H 1 offset(0,36) A_StartSound("weapons/huntopen",8);
-		SHTG H 1 offset(0,38);
-		SHTG H 4 offset(0,36){
-			A_MuzzleClimb(-frandom(1.2,2.4),frandom(1.2,2.4));
-			if(invoker.weaponstatus[KHLEBS_CHAMBER]<1){
-				setweaponstate("unloadtube");
-			}else A_StartSound("weapons/huntrackbak",8,CHANF_OVERLAP);
-		}
-		SHTG I 8 offset(0,34){
-			A_MuzzleClimb(-frandom(1.2,2.4),frandom(1.2,2.4));
-			int chm=invoker.weaponstatus[KHLEBS_CHAMBER];
-			invoker.weaponstatus[KHLEBS_CHAMBER]=0;
-			if(chm>1){
-				A_StartSound("weapons/huntreload",8);
-				if(A_JumpIfInventory("HDShellAmmo",0,"null"))A_SpawnItemEx("HDFumblingShell",
-					cos(pitch)*8,0,height-7-sin(pitch)*8,
-					vel.x+cos(pitch)*cos(angle-random(86,90))*5,
-					vel.y+cos(pitch)*sin(angle-random(86,90))*5,
-					vel.z+sin(pitch)*random(4,6),
-					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-				);else{
-					HDF.Give(self,"HDShellAmmo",1);
-					A_StartSound("weapons/pocket",9);
-					A_SetTics(5);
+			goto readyend;
+		hold:
+			KLBG A 0 {
+				bool paf = pressingAltFire();
+				if (
+					paf && !(invoker.weaponStatus[0]&KHLEBF_ALTHOLDING)
+				) {
+					setWeaponState("chamber");
+				} else if (!paf) {
+					invoker.weaponStatus[0] &= ~KHLEBF_ALTHOLDING;
 				}
-			}else if(chm>0)A_SpawnItemEx("HDSpentShell",
-				cos(pitch)*8,0,height-7-sin(pitch)*8,
-				vel.x+cos(pitch)*cos(angle-random(86,90))*5,
-				vel.y+cos(pitch)*sin(angle-random(86,90))*5,
-				vel.z+sin(pitch)*random(4,6),
-				0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-			);
-		}
-		SHTG H 0 A_StartSound("weapons/huntrackfwd",8);
-		SHTG H 0 A_JumpIf(!pressingunload(),"reloadend");
-		SHTG H 4 offset(0,40);
-	unloadtube:
-		SHTG H 6 offset(0,40) EmptyHand(careful:true);
-	unloadloop:
-		SHTG H 8 offset(1,41){
-			if(invoker.weaponstatus[KHLEBS_TUBE]<1)setweaponstate("reloadend");
-			else if(invoker.handshells>=3)setweaponstate("unloadloopend");
-			else{
-				invoker.handshells++;
-				invoker.weaponstatus[KHLEBS_TUBE]--;
 			}
-		}
-		SHTG H 4 offset(0,40) A_StartSound("weapons/huntreload",8);
-		loop;
-	unloadloopend:
-		SHTG H 6 offset(1,41);
-		SHTG H 3 offset(1,42){
-			int rmm=HDPickup.MaxGive(self,"HDShellAmmo",ENC_SHELL);
-			if(rmm>0){
-				A_StartSound("weapons/pocket",9);
+			KLBG A 1 A_WeaponReady(WRF_NOFIRE);
+			KLBG A 0 A_Refire();
+			goto ready;
+		fire:
+			KLBG A 0 A_JumpIf(invoker.weaponStatus[KHLEBS_CHAMBER] > 2, "shoot");
+			KLBG A 1 A_WeaponReady(WRF_NONE);
+			KLBG A 0 A_Refire();
+			goto ready;
+		shoot:
+			KLBG A 2;
+			KLBG A 1 offset(0, 36) A_FireKhleb();
+			KLBG E 1;
+			goto ready;
+		altfire:
+		chamber:
+			KLBG A 0 A_JumpIf(invoker.weaponStatus[0]&KHLEBF_ALTHOLDING, "nope");
+			KLBG A 0 A_SetAltHold(true);
+			KLBG A 1 A_StartSound("weapons/khlebRackBak",8);
+			KLBG AE 2 A_MuzzleClimb(0, frandom(0.6, 1.0));
+			KLBG E 2 A_JumpIf(pressingAltFire(), "longstroke");
+			KLBG EA 2 A_MuzzleClimb(0, -frandom(0.6, 1.0));
+			KLBG E 0 A_StartSound("weapons/khlebShort", 8);
+			KLBG E 0 A_Refire("ready");
+			goto ready;
+		longstroke:
+			KLBG F 2 A_MuzzleClimb(frandom(1.0, 2.0));
+			KLBG F 0 {
+				A_Chamber();
+				A_MuzzleClimb(-frandom(1.0, 2.0));
+			}
+		racked:
+			KLBG F 1 A_WeaponReady(WRF_NOFIRE);
+			KLBG F 0 A_JumpIf(!pressingAltFire(), "unrack");
+			KLBG F 0 A_JumpIf(pressingunload(), "rackunload");
+			KLBG F 0 A_JumpIf(invoker.weaponStatus[KHLEBS_CHAMBER], "racked");
+			KLBG F 0{
+				int rld = 0;
+				if (pressingReload()) {
+					rld = 1;
+				}else if (pressingAltReload()) {
+					rld = 2;
+					invoker.weaponStatus[0] |= KHLEBF_SLUG;
+				}
+
+				if (
+					rld > 0
+					&& (
+						countinv("HD4GSAmmo")
+						|| countinv("HD4GBAmmo")
+					)
+				) {
+					setWeaponState("rackreload");
+				}
+			}
+			loop;
+		rackreload:
+			KLBG F 1 offset(-1, 35) A_WeaponBusy(true);
+			KLBG F 2 offset(-2, 37);
+			KLBG F 4 offset(-3, 40);
+			KLBG F 1 offset(-4, 42); // A_GrabShells(1, true, true);
+			KLBG F 6 offset(-5, 43);
+			KLBG F 6 offset(-4, 41) A_StartSound("weapons/pocket",9);
+		rackloadone:
+			KLBG F 1 offset(-4, 42);
+			KLBG F 2 offset(-4, 41) {
+				if (pressingAltReload()) invoker.weaponStatus[0] |= KHLEBF_SLUG;
+				if (countinv("HD4GSAmmo") > 0 && countinv("HD4GBAmmo") < 1) invoker.weaponStatus[0] |= KHLEBF_SLUG;
+				if (countinv("HD4GSAmmo") < 1) invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+			}
+			KLBG F 3 offset(-4, 40) {
+				bool slg = invoker.weaponStatus[0]&KHLEBF_SLUG;
+				switch (invoker.weaponStatus[KHLEBS_CHAMBER]) {
+					case 0:
+						A_StartSound("weapons/khlebReload", 8, CHANF_OVERLAP);
+						A_TakeInventory(slg ? "HD4GSAmmo" : "HD4GBAmmo", 1, TIF_NOTAKEINFINITE);
+						invoker.weaponStatus[KHLEBS_CHAMBER] = invoker.weaponStatus[0]&KHLEBF_SLUG ? 4 : 3;
+						break;
+					case 3:
+					case 4:
+						if (
+							invoker.weaponStatus[KHLEBS_TB1] > 0
+							&& invoker.weaponStatus[KHLEBS_TB2] > 0
+							&& invoker.weaponStatus[KHLEBS_TB3] > 0
+							// && invoker.weaponStatus[KHLEBS_TB4] > 0
+						) {
+							A_Jump(256, 3);
+							break;
+						} else {
+							A_StartSound("weapons/khlebReload", 8, CHANF_OVERLAP);
+							A_TakeInventory(slg ? "HD4GSAmmo" : "HD4GBAmmo", 1, TIF_NOTAKEINFINITE);
+							// invoker.weaponStatus[KHLEBS_TB4] = invoker.weaponStatus[KHLEBS_TB3];
+							invoker.weaponStatus[KHLEBS_TB3] = invoker.weaponStatus[KHLEBS_TB2];
+							invoker.weaponStatus[KHLEBS_TB2] = invoker.weaponStatus[KHLEBS_TB1];
+							invoker.weaponStatus[KHLEBS_TB1] = invoker.weaponStatus[KHLEBS_CHAMBER];
+							invoker.weaponStatus[KHLEBS_CHAMBER] = invoker.weaponStatus[0]&KHLEBF_SLUG ? 4 : 3;
+							break;
+						}
+						break;
+					case 1:
+					case 2:
+						break;
+					default:
+						break;
+				}
+			}
+			KLBG F 5 offset(-4, 41);
+			KLBG F 4 offset(-4, 40) A_JumpIf(invoker.handshells > 0, "rackloadone");
+			goto rackreloadend;
+		rackreloadend:
+			KLBG F 1 offset(-3, 39) {
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+			}
+			KLBG F 1 offset(-2, 37);
+			KLBG F 1 offset(-1, 34);
+			KLBG F 0 A_WeaponBusy(false);
+			goto racked;
+
+		rackunload:
+			KLBG F 1 offset(-1, 35) A_WeaponBusy(true);
+			KLBG F 2 offset(-2, 37);
+			KLBG F 4 offset(-3, 40);
+			KLBG F 1 offset(-4, 42);
+			KLBG F 2 offset(-4, 41);
+			KLBG F 3 offset(-4, 40) {
+				int chm = invoker.weaponStatus[KHLEBS_CHAMBER];
+				invoker.weaponStatus[KHLEBS_CHAMBER] = 0;
+
+				if (chm > 2) {
+					A_StartSound("weapons/khlebReload", 8);
+
+					if (A_JumpIfInventory(chm == 4 ? "HD4GSAmmo" : "HD4GBAmmo", 0, "null")) {
+						A_SpawnItemEx(
+							chm == 4 ? "HDFumbling4GS" : "HDFumbling4GB",
+							cos(pitch) * 8, 0, height - 7 - sin(pitch) * 8,
+							vel.x + cos(pitch) * cos(angle - random(86, 90)) * 5,
+							vel.y + cos(pitch) * sin(angle - random(86, 90)) * 5,
+							vel.z + sin(pitch) * random(4,6),
+							0,
+							SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+						);
+					} else {
+						HDF.Give(self, chm == 4 ? "HD4GSAmmo" : "HD4GBAmmo", 1);
+						A_StartSound("weapons/pocket", 9);
+						A_SetTics(5);
+					}
+				} else if (chm > 0) {
+					A_SpawnItemEx(
+						chm == 2 ? "HDSpent4GS" : "HDSpent4GBb",
+						cos(pitch) * 8, 0, height - 7 - sin(pitch) * 8,
+						vel.x + cos(pitch) * cos(angle - random(86, 90)) * 5,
+						vel.y + cos(pitch) * sin(angle - random(86, 90)) * 5,
+						vel.z + sin(pitch) * random(4,6),
+						0,
+						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+				}
+
+				if (chm) A_StartSound("weapons/khlebReload", 8, CHANF_OVERLAP);
+			}
+			KLBG F 5 offset(-4, 41);
+			KLBG F 4 offset(-4, 40) A_JumpIf(invoker.handshells > 0, "rackloadone");
+			goto rackreloadend;
+
+		unrack:
+			KLBG F 0 A_StartSound("weapons/khlebRackFwd", 8);
+			KLBG E 2 A_JumpIf(!pressingFire(), 1);
+			KLBG EA 2 {
+				if (pressingFire()) A_SetTics(1);
+				A_MuzzleClimb(0, -frandom(0.6, 1.0));
+			}
+			KLBG A 0 A_ClearRefire();
+			goto ready;
+		flash:
+			KLBF A 1 bright {
+				A_Light2();
+				HDFlashAlpha(-32);
+			}
+			TNT1 A 1 A_ZoomRecoil(0.9);
+			TNT1 A 0 A_Light0();
+			TNT1 A 0 A_AlertMonsters();
+			stop;
+		altreload:
+			KLBG A 0 {
+				invoker.weaponStatus[0] |= KHLEBF_SLUG;
+			}
+		reload:
+		startreload:
+			KLBG A 0 A_JumpIf(countinv("HD4GBAmmo") < 1 && countinv("HD4GSAmmo") < 1, "nope");
+			KLBG A 1 A_JumpIf(invoker.weaponStatus[KHLEBS_TB3] > 0, "nope");
+			// KLBG A 1 A_JumpIf(invoker.weaponStatus[KHLEBS_TB4] > 0, "nope");
+			KLBG AB 4 A_MuzzleClimb(frandom(0.6, 0.7), -frandom(0.6, 0.7));
+		reloadstarthand:
+			KLBG C 1 offset(0, 36);
+			KLBG C 1 offset(0, 38);
+			KLBG C 2 offset(0, 36);
+			KLBG C 2 offset(0, 34);
+			KLBG C 3 offset(0, 36);
+			KLBG C 3 offset(0, 40) {
+				if (pressingAltReload()) invoker.weaponStatus[0] |= KHLEBF_SLUG;
+				if (countinv("HD4GSAmmo") > 0 && countinv("HD4GBAmmo") < 1) invoker.weaponStatus[0] |= KHLEBF_SLUG;
+				if (countinv("HD4GSAmmo") < 1) invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+			}
+			// KLBG C 0 A_JumpIf(invoker.weaponStatus[0]&KHLEBF_FROMPOCKETS,"reloadpocket");
+		// reloadfast:
+		// 	KLBG C 4 offset(0,40) A_GrabShells(3, false);
+		// 	KLBG C 3 offset(0,42) A_StartSound("weapons/pocket", 9, volume: 0.4);
+		// 	KLBG C 3 offset(0,41);
+		// 	goto reloadashell;
+		reloadpocket:
+			KLBG C 4 offset(0, 39) A_GrabShells(3, false);
+			// KLBG C 6 offset(0,40) A_JumpIf(health>40,1);
+			KLBG C 4 offset(0, 40) A_StartSound("weapons/pocket", 9);
+			KLBG C 8 offset(0, 42) A_StartSound("weapons/pocket", 9);
+			KLBG C 6 offset(0, 41) A_StartSound("weapons/pocket", 9);
+			KLBG C 6 offset(0, 40);
+			goto reloadashell;
+		reloadashell:
+			KLBG C 2 offset(0, 36);
+			KLBG C 4 offset(0, 34) A_LoadTubeFromHand();
+			KLBG CCCCCC 1 offset(0, 33) {
+				if (
+					PressingReload()
+					|| PressingAltReload()
+					|| PressingUnload()
+					|| PressingFire()
+					|| PressingAltfire()
+					|| PressingZoom()
+					|| PressingFiremode()
+				) {
+					invoker.weaponStatus[0] |= KHLEBF_HOLDING;
+				} else {
+					invoker.weaponStatus[0] &= ~KHLEBF_HOLDING;
+				}
+
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+
+				if (
+					invoker.weaponStatus[KHLEBS_TB3] > 0
+					// invoker.weaponStatus[KHLEBS_TB4] > 0
+					|| (
+						invoker.handshells < 1
+						&& !countinv("HD4GBAmmo")
+						&& !countinv("HD4GSAmmo")
+					)
+				) {
+					setWeaponState("reloadend");
+				} else if (!(pressingReload() || pressingAltReload())) {
+					setWeaponState("reloadend");
+				} else if (invoker.handshells < 1) {
+					setWeaponState("reloadstarthand");
+				}
+			}
+			goto reloadashell;
+		reloadend:
+			KLBG C 4 offset(0, 34) A_StartSound("weapons/khlebOpen", 8, CHANF_OVERLAP);
+			KLBG C 1 offset(0, 36) EmptyHand(careful: true);
+			KLBG C 1 offset(0, 34) {
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+			}
+			KLBG CBA 3;
+			KLBG A 0 A_JumpIf(invoker.weaponStatus[0]&KHLEBF_HOLDING, "nope");
+			goto ready;
+
+		cannibalize:
+			goto nope;
+
+		unloadSS:
+			goto nope;
+
+		unload:
+			KLBG A 1 A_JumpIf(invoker.weaponStatus[KHLEBS_CHAMBER] < 1 && invoker.weaponStatus[KHLEBS_TB1] < 1, "nope");
+			KLBG BC 4 A_MuzzleClimb(frandom(1.2, 2.4), -frandom(1.2, 2.4));
+			KLBG C 1 offset(0, 34);
+			KLBG C 1 offset(0, 36) A_StartSound("weapons/khlebOpen", 8);
+			KLBG C 1 offset(0, 38);
+			KLBG C 4 offset(0, 36) {
+				A_MuzzleClimb(-frandom(1.2, 2.4), frandom(1.2, 2.4));
+				if (invoker.weaponStatus[KHLEBS_CHAMBER] < 1) {
+					setWeaponState("unloadtube");
+				} else {
+					A_StartSound("weapons/khlebRackBak", 8, CHANF_OVERLAP);
+				}
+			}
+			KLBG D 8 offset(0, 34) {
+				A_MuzzleClimb(-frandom(1.2, 2.4), frandom(1.2, 2.4));
+
+				int chm = invoker.weaponStatus[KHLEBS_CHAMBER];
+				invoker.weaponStatus[KHLEBS_CHAMBER] = 0;
+
+				if (chm > 2) {
+					A_StartSound("weapons/khlebReload",8);
+
+					if (A_JumpIfInventory(chm == 4 ? "HD4GSAmmo" : "HD4GBAmmo", 0, "null")) {
+
+						// FIXME: use A_EjectCasing() instead
+						A_SpawnItemEx(
+							chm == 4 ? "HDFumbling4GS" : "HDFumbling4GB",
+							cos(pitch) * 8, 0, height - 7 - sin(pitch) * 8,
+							vel.x + cos(pitch) * cos(angle - random(86, 90)) * 5,
+							vel.y + cos(pitch) * sin(angle - random(86, 90)) * 5,
+							vel.z + sin(pitch) * random(4, 6),
+							0,
+							SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+						);
+					} else {
+						HDF.Give(self, chm == 4 ? "HD4GSAmmo" : "HD4GBAmmo", 1);
+						A_StartSound("weapons/pocket", 9);
+						A_SetTics(5);
+					}
+				} else if (chm > 0) {
+
+					// FIXME: use A_EjectCasing() instead
+					A_SpawnItemEx(
+						chm == 2 ? "HDSpent4GS" : "HDSpent4GBb",
+						cos(pitch)*8, 0, height - 7 - sin(pitch) * 8,
+						vel.x + cos(pitch) * cos(angle - random(86, 90)) * 5,
+						vel.y + cos(pitch) * sin(angle - random(86, 90)) * 5,
+						vel.z + sin(pitch) * random(4, 6),
+						0,
+						SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+				}
+			}
+			KLBG C 0 A_StartSound("weapons/khlebRackFwd", 8);
+			KLBG C 0 A_JumpIf(!pressingunload(), "reloadend");
+			KLBG C 4 offset(0, 40);
+		unloadtube:
+			KLBG C 6 offset(0, 40) EmptyHand(careful: true);
+		unloadloop:
+			KLBG C 8 offset(1, 41) {
+				if (invoker.weaponStatus[KHLEBS_TB1] < 1) {
+					setWeaponState("reloadend");
+				} else if (invoker.handshells >= 3) {
+					setWeaponState("unloadloopend");
+				} else {
+					for ( int i = KHLEBS_TB1; i <= KHLEBS_TB3; i--) {
+					// for ( int i = KHLEBS_TB1; i <= KHLEBS_TB4; i--) {
+						if (invoker.weaponStatus[i] < 1) continue;
+
+						if (invoker.weaponStatus[i] == 4) invoker.weaponStatus[0] |= KHLEBF_SLUG;
+
+						invoker.weaponStatus[i] = 0;
+						invoker.handshells = 1;
+						A_PushKhlebTube();
+
+						break;
+					}
+				}
+			}
+			KLBG C 4 offset(0, 40) {
+				A_StartSound("weapons/khlebReload", 8);
+				EmptyHand(careful: true);
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+			}
+			loop;
+		unloadloopend:
+			KLBG C 6 offset(1, 41);
+			KLBG C 3 offset(1, 42) {
+				A_StartSound("weapons/pocket", 9);
 				A_SetTics(8);
-				HDF.Give(self,"HDShellAmmo",min(rmm,invoker.handshells));
-				invoker.handshells=max(invoker.handshells-rmm,0);
 			}
-		}
-		SHTG H 0 EmptyHand(careful:true);
-		SHTG H 6 A_Jumpif(!pressingunload(),"reloadend");
-		goto unloadloop;
-	spawn:
-		HUNT ABCDEFG -1 nodelay{
-			int ssh=invoker.weaponstatus[SHOTS_SIDESADDLE];
-			if(ssh>=11)frame=0;
-			else if(ssh>=9)frame=1;
-			else if(ssh>=7)frame=2;
-			else if(ssh>=5)frame=3;
-			else if(ssh>=3)frame=4;
-			else if(ssh>=1)frame=5;
-			else frame=6;
-		}
+			KLBG C 6 {
+				invoker.weaponStatus[0] &= ~KHLEBF_SLUG;
+				A_Jumpif(!pressingunload(),"reloadend");
+			}
+			goto unloadloop;
+		spawn:
+			KLEB A -1 nodelay;
 	}
-	override void InitializeWepStats(bool idfa){
-		weaponstatus[KHLEBS_CHAMBER]=2;
-		if(!idfa){
-			weaponstatus[KHLEBS_TUBESIZE]=3;
-			weaponstatus[KHLEBS_CHOKE]=0;
+	override void InitializeWepStats(bool idfa) {
+		if (weaponStatus[0]&KHLEBF_SLUGLOADOUT) {
+			weaponStatus[KHLEBS_CHAMBER] = 4;
+			weaponStatus[KHLEBS_TB1] = 4;
+			weaponStatus[KHLEBS_TB2] = 4;
+			weaponStatus[KHLEBS_TB3] = 4;
+			// weaponStatus[KHLEBS_TB4] = 4;
+		} else {
+			weaponStatus[KHLEBS_CHAMBER] = 3;
+			weaponStatus[KHLEBS_TB1] = 3;
+			weaponStatus[KHLEBS_TB2] = 3;
+			weaponStatus[KHLEBS_TB3] = 3;
+			// weaponStatus[KHLEBS_TB4] = 3;
 		}
-		weaponstatus[KHLEBS_TUBE]=weaponstatus[KHLEBS_TUBESIZE];
-		weaponstatus[SHOTS_SIDESADDLE]=12;
-		handshells=0;
+
+		handshells = 0;
 	}
-	override void loadoutconfigure(string input){
+	override void loadoutconfigure(string input) {
+
+		// Start with Slugs
+		int shell = min(getloadoutvar(input, "slugs", 1), 1);
+		if (shell >= 0) {
+			weaponstatus[0] |= KHLEBF_SLUGLOADOUT;
+			weaponstatus[KHLEBS_CHAMBER] = 4;
+			weaponstatus[KHLEBS_TB1] = 4;
+			weaponstatus[KHLEBS_TB2] = 4;
+			weaponstatus[KHLEBS_TB3] = 4;
+			// weaponstatus[KHLEBS_TB4] = 4;
+		}
 	}
 }
-enum hunterstatus{
-	KHLEBF_JAMMED=2,
-	KHLEBF_UNLOADONLY=4,
-	KHLEBF_FROMPOCKETS=8,
-	KHLEBF_ALTHOLDING=16,
-	KHLEBF_HOLDING=1,
 
-	KHLEBS_FIREMODE=1,
-	KHLEBS_CHAMBER=2,
-	//3 is for side saddles
-	KHLEBS_TUBE=4,
-	KHLEBS_TUBESIZE=5,
-	KHLEBS_HAND=6,
-	KHLEBS_CHOKE=7,
+enum khlebstatus {
+	KHLEBS_TB1         = 1,     // mouth of tube
+	KHLEBS_TB2         = 2,
+	KHLEBS_TB3         = 3,
+	// KHLEBS_TB4         = 4,
+	KHLEBS_CHAMBER     = 5,    // 0 empty, 1 spent shl, 2 spent slg, 3 shell, 4 slug
+	KHLEBS_HAND        = 6,
+
+	KHLEBF_SLUG        = 1,
+	KHLEBF_UNLOADONLY  = 2,
+	KHLEBF_SLUGLOADOUT = 4,    // Refreshes with slugs at the range ammobox
+	KHLEBF_ALTHOLDING  = 8,
+	KHLEBF_HOLDING     = 16
 };
-/*
 
-class HunterRandom:IdleDummy{
-	states{
-	spawn:
-		TNT1 A 0 nodelay{
-			let ggg=Hunter(spawn("Hunter",pos,ALLOW_REPLACE));
-			if(!ggg)return;
-			HDF.TransferSpecials(self,ggg,HDF.TS_ALL);
+class KhlebRandom : IdleDummy {
+	states {
+		spawn:
+		TNT1 A 0 nodelay {
+			let ggg = RIKhleb(spawn("RIKhleb", pos, ALLOW_REPLACE));
 
-			if(!random(0,7))ggg.weaponstatus[KHLEBS_CHOKE]=random(0,7);
-			if(!random(0,32)){
+			if (!ggg) return;
 
-			}
-		}stop;
+			HDF.TransferSpecials(self, ggg, HDF.TS_ALL);
+
+			// TODO: Spawn Slugs/Shells randomly?
+		}
 	}
 }
-
-
-*/

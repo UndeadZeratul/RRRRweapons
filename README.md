@@ -2,10 +2,10 @@
 _..Nailed it_
 
 
-_Original Author: RightInfinity  
-Additional Polish by VinceHo/Grim96, Undead_Zeratul_
+_Original Author: RightInfinity_  
+_Additional Polish by VinceHo/Grim96, Undead\_Zeratul_
 
-_Requires [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-Recasted) by the HDest Community._
+_Requires [HDCoreLib](https://github.com/HDest-Community/hdest-core-lib) & [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-Recasted), both made by the HDest Community._
 
 ### Weapons
 
@@ -34,8 +34,18 @@ _Requires [BulletLib - Recasted](https://github.com/HDest-Community/HDBulletLib-
 #### Brontoris Cannon W/Bolt Rack
  - Classname `RIBrontoBuddy`
  - Loadout Code `BRR`
+
  + Standard bronto that has a shotgun-like sidesaddle on the side.
  + Due to the shell weight and bulk, does not speed up reload, and is primarly meant for soldiers who use a bronto in a tertiary role, and would love to save some bulk in their backpack or pockets
+
+#### KS-23 "Khleb" 4ga Pump-Action Shotgun
+ - Classname `RIKhleb`
+ - Loadout Code `KLB`
+   - `slugs 0/1` Whether to start loaded with slugs instead of shells
+
+ + Accepts both 4ga Shells & 4ga Slugs
+ + Holds 3 rounds in the tube
+ + Based off the Peppergrinder's Greely, can freely use either/both rounds, and swap between.
 
 ### Magazines
 
@@ -148,6 +158,7 @@ Please yell at me if my code offends. I'm pretty horrid and need the ruler over 
 - Tommy gun sprites by YukesVonFaust  
 - Captain J for the ppsh drum sprite I edited into a Thompson reload sprite + His USAS 12 sprites that blat good  
 - Potetobloke For the reaper drum base sprite  
+- Sonik.O Fan (TSF) for the KS-23 Sprites
 
 ### Thanks to:
 - TheBadInfluence for doing better research than I could on the nitty gritty Thompson functions

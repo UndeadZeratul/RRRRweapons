@@ -1,7 +1,6 @@
 version "4.13"
 
 // Ammunition
-#include "zscript/RightInfinity/ammo/RightAmmo.zs"
 #include "zscript/RightInfinity/ammo/DrumAmmo.zs"
 
 // Weapons
